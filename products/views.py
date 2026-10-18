@@ -1,4 +1,5 @@
 import requests
+from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -6,7 +7,6 @@ from rest_framework.response import Response
 from .models import Product
 from .forms import ProductForm
 from .serializers import ProductSerializer
-from django.db import IntegrityError
 
 
 def home_view(request):
@@ -56,28 +56,28 @@ def sync_products(request):
         response.raise_for_status()
         root_json = response.json()
 
-
         items_list = root_json.get('data', [])
 
         for item in items_list:
-
             product_name = item.get('name') or item.get('description') or "Χωρίς Όνομα"
-            Product.objects.update_or_create(
-                code=item.get('code', 'UNKNOWN'),
-                defaults={
-                    'name': product_name,
-                    'price': item.get('wholesalePrice') or item.get('retailPrice') or 0,
-                    'quantity': item.get('qty', 10),
-                    'barcode': item.get('barcode', None),
-                    'description': item.get('description', ''),
-                }
 
-            )
+            try:
+                Product.objects.update_or_create(
+                    code=item.get('code', 'UNKNOWN'),
+                    defaults={
+                        'name': product_name,
+                        'price': item.get('wholesalePrice') or item.get('retailPrice') or 0,
+                        'quantity': item.get('qty', 10),
+                        'barcode': item.get('barcode', None),
+                        'description': item.get('description', ''),
+                    }
+                )
+            except IntegrityError:
+                print(f"Skipped item {item.get('code')}: duplicate name")
     except requests.exceptions.RequestException as e:
         print(f"API Sync Failure: {e}")
 
     return redirect('product_list_view')
-
 
 
 @api_view(['GET'])
