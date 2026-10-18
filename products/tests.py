@@ -256,3 +256,15 @@ class SyncProductsTests(TestCase):
         mock_get.return_value = fake_response([])
         self.client.get(reverse("sync_products"))
         self.assertFalse(Product.objects.exists())
+
+    def test_duplicate_names_from_api_do_not_crash(self, mock_get):
+        mock_get.return_value = fake_response([
+            {"code": "D1", "name": "Same name", "wholesalePrice": 1, "qty": 1},
+            {"code": "D2", "name": "Same name", "wholesalePrice": 1, "qty": 1},
+        ])
+        response = self.client.get(reverse("sync_products"))
+        self.assertRedirects(response, reverse("product_list_view"))
+
+        response = self.client.get(reverse("sync_products"))
+        # TODO 2: check the response redirects to the product list
+        self.assertRedirects(response, reverse("product_list_view"))

@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from .models import Product
 from .forms import ProductForm
 from .serializers import ProductSerializer
+from django.db import IntegrityError
 
 
 def home_view(request):
@@ -61,7 +62,6 @@ def sync_products(request):
         for item in items_list:
 
             product_name = item.get('name') or item.get('description') or "Χωρίς Όνομα"
-
             Product.objects.update_or_create(
                 code=item.get('code', 'UNKNOWN'),
                 defaults={
@@ -71,6 +71,7 @@ def sync_products(request):
                     'barcode': item.get('barcode', None),
                     'description': item.get('description', ''),
                 }
+
             )
     except requests.exceptions.RequestException as e:
         print(f"API Sync Failure: {e}")
