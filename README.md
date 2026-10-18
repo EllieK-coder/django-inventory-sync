@@ -1,4 +1,5 @@
 # NexusERP
+[![Tests](https://github.com/EllieK-coder/NexusERP/actions/workflows/tests.yml/badge.svg)](https://github.com/EllieK-coder/NexusERP/actions/workflows/tests.yml)
 
 A Django inventory management app that keeps a local product catalogue in sync with an external ERP REST API. It combines a server-rendered dashboard for managing stock by hand with a JSON API for other systems to read from.
 
