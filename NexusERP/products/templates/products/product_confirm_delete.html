@@ -1,0 +1,30 @@
+{% extends 'products/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card shadow border-danger bg-dark text-white p-4">
+            <div class="card-body text-center">
+                <h2 class="text-danger fw-bold mb-4">⚠️ Επιβεβαίωση Διαγραφής</h2>
+                
+                <p class="fs-5 mb-4">
+                    Είστε σίγουροι ότι θέλετε να διαγράψετε οριστικά το προϊόν <br>
+                    <strong class="text-info">"{{ product.name }}"</strong> με κωδικό <strong class="text-warning">{{ product.code }}</strong>;
+                </p>
+                
+                <div class="alert alert-warning text-dark border-start border-warning border-4 text-start">
+                    <strong>Προσοχή:</strong> Αυτή η ενέργεια είναι μόνιμη και δεν μπορεί να αναιρεθεί από τη βάση δεδομένων.
+                </div>
+
+                <hr class="my-4 border-secondary">
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <a href="{% url 'product_list_view' %}" class="btn btn-outline-light px-4 me-2">Ακύρωση</a>
+                    <button type="submit" class="btn btn-danger px-4 fw-bold">Ναι, Διαγραφή</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

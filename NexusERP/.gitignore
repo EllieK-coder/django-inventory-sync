@@ -1,0 +1,19 @@
+# Python bytecode (compiled cache files)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Local virtual environment
+.venv/
+venv/
+ENV/
+
+# Local databases (Never upload your live SQLite database)
+*.sqlite3
+
+# PyCharm specific settings configuration files
+.idea/
+
+# Environment configurations containing secure keys
+.env

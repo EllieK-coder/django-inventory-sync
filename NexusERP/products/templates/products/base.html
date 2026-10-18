@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{% url 'product_list_view' %}" class="btn btn-outline-secondary me-3">&larr; Πίσω</a>
+            <h2 class="text-info fw-bold mb-0">{{ title }} Προϊόντος (Nexus ERP)</h2>
+        </div>
+
+        <div class="card shadow border-secondary bg-dark text-white p-4">
+            <div class="card-body">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary">Κωδικός (Code) *</label>
+                            <input type="text" name="code" class="form-control bg-secondary text-white border-dark {% if form.code.errors %}is-invalid{% endif %}" value="{{ form.code.value|default:'' }}">
+                            <div class="invalid-feedback">{% for error in form.code.errors %}{{ error }}{% endfor %}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary">Barcode</label>
+                            <input type="text" name="barcode" class="form-control bg-secondary text-white border-dark {% if form.barcode.errors %}is-invalid{% endif %}" value="{{ form.barcode.value|default:'' }}">
+                            <div class="invalid-feedback">{% for error in form.barcode.errors %}{{ error }}{% endfor %}</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-secondary">Όνομα Προϊόντος *</label>
+                            <input type="text" name="name" class="form-control bg-secondary text-white border-dark {% if form.name.errors %}is-invalid{% endif %}" value="{{ form.name.value|default:'' }}">
+                            <div class="invalid-feedback">{% for error in form.name.errors %}{{ error }}{% endfor %}</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary">Τιμή (€) *</label>
+                            <input type="number" step="0.01" name="price" class="form-control bg-secondary text-white border-dark {% if form.price.errors %}is-invalid{% endif %}" value="{{ form.price.value|default:'0.00' }}">
+                            <div class="invalid-feedback">{% for error in form.price.errors %}{{ error }}{% endfor %}</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary">Ποσότητα (Stock) *</label>
+                            <input type="number" name="quantity" class="form-control bg-secondary text-white border-dark {% if form.quantity.errors %}is-invalid{% endif %}" value="{{ form.quantity.value|default:'0' }}">
+                            <div class="invalid-feedback">{% for error in form.quantity.errors %}{{ error }}{% endfor %}</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-secondary">Περιγραφή</label>
+                            <textarea name="description" rows="3" class="form-control bg-secondary text-white border-dark {% if form.description.errors %}is-invalid{% endif %}">{{ form.description.value|default:'' }}</textarea>
+                            <div class="invalid-feedback">{% for error in form.description.errors %}{{ error }}{% endfor %}</div>
+                        </div>
+                    </div>
+
+                    <hr class="my-4 border-secondary">
+
+                    <div class="d-flex justify-content-end">
+                        <a href="{% url 'product_list_view' %}" class="btn btn-outline-light me-2">Ακύρωση</a>
+                        <button type="submit" class="btn btn-success px-4 fw-bold">Αποθήκευση</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
