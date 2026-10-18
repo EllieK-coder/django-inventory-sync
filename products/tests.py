@@ -1,3 +1,258 @@
-from django.test import TestCase
+"""Tests for the products app.
 
-# Create your tests here.
+Run them with:
+    python manage.py test
+
+Django creates a separate, empty test database for every run,
+so these tests never touch your real db.sqlite3.
+"""
+from decimal import Decimal
+from unittest.mock import Mock, patch
+
+import requests
+from django.db import IntegrityError
+from django.test import TestCase
+from django.urls import reverse
+
+from .forms import ProductForm
+from .models import Product
+
+
+def make_product(**overrides):
+    """Create a product with sensible defaults; override any field you need."""
+    data = {
+        "code": "A100",
+        "name": "Office chair",
+        "price": Decimal("89.90"),
+        "quantity": Decimal("12"),
+    }
+    data.update(overrides)
+    return Product.objects.create(**data)
+
+
+# ---------------------------------------------------------------------------
+# Model
+# ---------------------------------------------------------------------------
+class ProductModelTests(TestCase):
+    def test_str_returns_name(self):
+        product = make_product(name="Desk lamp")
+        self.assertEqual(str(product), "Desk lamp")
+
+    def test_code_must_be_unique(self):
+        make_product(code="A100", name="First")
+        with self.assertRaises(IntegrityError):
+            make_product(code="A100", name="Second")
+
+    def test_name_must_be_unique(self):
+        make_product(code="A100", name="Same name")
+        with self.assertRaises(IntegrityError):
+            make_product(code="B200", name="Same name")
+
+
+# ---------------------------------------------------------------------------
+# Form validation
+# ---------------------------------------------------------------------------
+class ProductFormTests(TestCase):
+    def form_data(self, **overrides):
+        data = {"code": "A100", "name": "Office chair", "price": "10.00", "quantity": "5"}
+        data.update(overrides)
+        return data
+
+    def test_valid_data_is_accepted(self):
+        form = ProductForm(data=self.form_data())
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_negative_price_is_rejected(self):
+        form = ProductForm(data=self.form_data(price="-1"))
+        self.assertFalse(form.is_valid())
+        self.assertIn("price", form.errors)
+
+    def test_zero_price_is_allowed(self):
+        form = ProductForm(data=self.form_data(price="0"))
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_required_fields(self):
+        form = ProductForm(data={})
+        self.assertFalse(form.is_valid())
+        for field in ("code", "name", "price", "quantity"):
+            self.assertIn(field, form.errors)
+
+    def test_barcode_and_description_are_optional(self):
+        form = ProductForm(data=self.form_data(barcode="", description=""))
+        self.assertTrue(form.is_valid(), form.errors)
+
+    def test_duplicate_code_is_rejected(self):
+        make_product(code="A100", name="Existing")
+        form = ProductForm(data=self.form_data(code="A100", name="New one"))
+        self.assertFalse(form.is_valid())
+        self.assertIn("code", form.errors)
+
+
+# ---------------------------------------------------------------------------
+# Pages (CRUD views)
+# ---------------------------------------------------------------------------
+class ProductViewTests(TestCase):
+    def test_root_redirects_to_home(self):
+        response = self.client.get("/")
+        self.assertRedirects(response, reverse("home_view"))
+
+    def test_home_page_loads(self):
+        response = self.client.get(reverse("home_view"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "products/home.html")
+
+    def test_list_shows_products(self):
+        make_product(name="Office chair")
+        response = self.client.get(reverse("product_list_view"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Office chair")
+
+    def test_list_shows_empty_message_when_no_products(self):
+        response = self.client.get(reverse("product_list_view"))
+        self.assertContains(response, "Η βάση δεδομένων είναι άδεια")
+
+    def test_create_product(self):
+        response = self.client.post(reverse("product_add"), {
+            "code": "N1", "name": "New product", "price": "5.50", "quantity": "3",
+        })
+        self.assertRedirects(response, reverse("product_list_view"))
+        product = Product.objects.get(code="N1")
+        self.assertEqual(product.price, Decimal("5.50"))
+
+    def test_create_with_invalid_data_shows_form_again(self):
+        response = self.client.post(reverse("product_add"), {
+            "code": "N1", "name": "Bad price", "price": "-5", "quantity": "1",
+        })
+        self.assertEqual(response.status_code, 200)  # form re-rendered, no redirect
+        self.assertFalse(Product.objects.exists())
+
+    def test_edit_product(self):
+        product = make_product()
+        response = self.client.post(reverse("product_edit", args=[product.pk]), {
+            "code": product.code, "name": "Renamed", "price": "1.00", "quantity": "1",
+        })
+        self.assertRedirects(response, reverse("product_list_view"))
+        product.refresh_from_db()
+        self.assertEqual(product.name, "Renamed")
+
+    def test_edit_missing_product_returns_404(self):
+        response = self.client.get(reverse("product_edit", args=[999]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_page_asks_for_confirmation_without_deleting(self):
+        product = make_product()
+        response = self.client.get(reverse("product_delete", args=[product.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(Product.objects.filter(pk=product.pk).exists())
+
+    def test_delete_product_on_post(self):
+        product = make_product()
+        response = self.client.post(reverse("product_delete", args=[product.pk]))
+        self.assertRedirects(response, reverse("product_list_view"))
+        self.assertFalse(Product.objects.filter(pk=product.pk).exists())
+
+
+# ---------------------------------------------------------------------------
+# REST API
+# ---------------------------------------------------------------------------
+class ProductApiTests(TestCase):
+    def test_returns_empty_list(self):
+        response = self.client.get(reverse("api_product_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), [])
+
+    def test_returns_products_as_json(self):
+        make_product(code="A100", name="Office chair", barcode="123")
+        data = self.client.get(reverse("api_product_list")).json()
+        self.assertEqual(len(data), 1)
+        self.assertEqual(data[0]["code"], "A100")
+        self.assertEqual(data[0]["name"], "Office chair")
+        self.assertEqual(data[0]["price"], "89.90")
+        self.assertEqual(data[0]["barcode"], "123")
+        self.assertEqual(
+            set(data[0]),
+            {"id", "code", "name", "price", "quantity", "barcode", "description"},
+        )
+
+
+# ---------------------------------------------------------------------------
+# Sync with the external API
+#
+# We never call the real API in tests: it could be slow, offline, or return
+# different data each time. Instead, @patch swaps `requests.get` inside
+# products.views for a fake (a Mock) that returns data we control.
+# ---------------------------------------------------------------------------
+def fake_response(items):
+    response = Mock()
+    response.json.return_value = {"data": items}
+    response.raise_for_status.return_value = None
+    return response
+
+
+@patch("products.views.requests.get")
+class SyncProductsTests(TestCase):
+    def test_creates_products_from_api(self, mock_get):
+        mock_get.return_value = fake_response([
+            {"code": "S1", "name": "Synced item", "wholesalePrice": 4.5, "qty": 7, "barcode": "999"},
+        ])
+        response = self.client.get(reverse("sync_products"))
+
+        self.assertRedirects(response, reverse("product_list_view"))
+        product = Product.objects.get(code="S1")
+        self.assertEqual(product.name, "Synced item")
+        self.assertEqual(product.price, Decimal("4.5"))
+        self.assertEqual(product.quantity, Decimal("7"))
+        self.assertEqual(product.barcode, "999")
+
+    def test_calls_api_with_a_timeout(self, mock_get):
+        mock_get.return_value = fake_response([])
+        self.client.get(reverse("sync_products"))
+        mock_get.assert_called_once()
+        self.assertIn("timeout", mock_get.call_args.kwargs)
+
+    def test_updates_existing_product_instead_of_duplicating(self, mock_get):
+        make_product(code="S1", name="Old name", price=Decimal("1"))
+        mock_get.return_value = fake_response([
+            {"code": "S1", "name": "New name", "wholesalePrice": 2, "qty": 1},
+        ])
+        self.client.get(reverse("sync_products"))
+
+        self.assertEqual(Product.objects.count(), 1)
+        product = Product.objects.get(code="S1")
+        self.assertEqual(product.name, "New name")
+        self.assertEqual(product.price, Decimal("2"))
+
+    def test_running_sync_twice_does_not_create_duplicates(self, mock_get):
+        mock_get.return_value = fake_response([
+            {"code": "S1", "name": "Item", "wholesalePrice": 1, "qty": 1},
+        ])
+        self.client.get(reverse("sync_products"))
+        self.client.get(reverse("sync_products"))
+        self.assertEqual(Product.objects.count(), 1)
+
+    def test_falls_back_to_description_and_retail_price(self, mock_get):
+        mock_get.return_value = fake_response([
+            {"code": "S2", "description": "Only a description", "retailPrice": 9.99, "qty": 1},
+        ])
+        self.client.get(reverse("sync_products"))
+        product = Product.objects.get(code="S2")
+        self.assertEqual(product.name, "Only a description")
+        self.assertEqual(product.price, Decimal("9.99"))
+
+    def test_network_error_does_not_crash(self, mock_get):
+        mock_get.side_effect = requests.exceptions.ConnectionError("API is down")
+        response = self.client.get(reverse("sync_products"))
+        self.assertRedirects(response, reverse("product_list_view"))
+        self.assertFalse(Product.objects.exists())
+
+    def test_http_error_does_not_crash(self, mock_get):
+        bad = Mock()
+        bad.raise_for_status.side_effect = requests.exceptions.HTTPError("500 Server Error")
+        mock_get.return_value = bad
+        response = self.client.get(reverse("sync_products"))
+        self.assertRedirects(response, reverse("product_list_view"))
+
+    def test_empty_response_creates_nothing(self, mock_get):
+        mock_get.return_value = fake_response([])
+        self.client.get(reverse("sync_products"))
+        self.assertFalse(Product.objects.exists())
