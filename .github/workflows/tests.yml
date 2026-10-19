@@ -9,6 +9,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    env:                                                # <-- NEW
+      DJANGO_SECRET_KEY: test-only-not-a-real-secret    # <-- NEW: dummy key just for CI
+
     steps:
       - name: Get the code
         uses: actions/checkout@v5
