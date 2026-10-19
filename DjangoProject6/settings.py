@@ -10,22 +10,30 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os                                  # <-- NEW
 from pathlib import Path
+from dotenv import load_dotenv             # <-- NEW
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load secrets and settings from the .env file next to manage.py
+load_dotenv(BASE_DIR / ".env")             # <-- NEW
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-iibny121hr5o5*w82^d57yrbh!x@+62xul*jpdo9@$k)u+%rc0'
+SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]                     # <-- CHANGED
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"             # <-- CHANGED
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")   # <-- CHANGED
+
+# External ERP API used by the product sync
+ERP_API_URL = os.getenv("ERP_API_URL", "")                       # <-- NEW
 
 
 # Application definition
