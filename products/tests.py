@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 
 import requests
 from django.db import IntegrityError
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .forms import ProductForm
@@ -189,6 +189,7 @@ def fake_response(items):
     return response
 
 
+@override_settings(ERP_API_URL="https://erp.example.test/api")
 @patch("products.views.requests.get")
 class SyncProductsTests(TestCase):
     def test_creates_products_from_api(self, mock_get):
@@ -266,5 +267,4 @@ class SyncProductsTests(TestCase):
         self.assertRedirects(response, reverse("product_list_view"))
 
         response = self.client.get(reverse("sync_products"))
-        # TODO 2: check the response redirects to the product list
         self.assertRedirects(response, reverse("product_list_view"))
