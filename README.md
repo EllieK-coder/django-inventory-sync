@@ -1,5 +1,6 @@
-# NexusERP
-[![Tests](https://github.com/EllieK-coder/NexusERP/actions/workflows/tests.yml/badge.svg)](https://github.com/EllieK-coder/NexusERP/actions/workflows/tests.yml)
+# Django Inventory Sync
+
+[![Tests](https://github.com/EllieK-coder/django-inventory-sync/actions/workflows/tests.yml/badge.svg)](https://github.com/EllieK-coder/django-inventory-sync/actions/workflows/tests.yml)
 
 A Django inventory management app that keeps a local product catalogue in sync with an external ERP REST API. It combines a server-rendered dashboard for managing stock by hand with a JSON API for other systems to read from.
 
@@ -29,8 +30,8 @@ A Django inventory management app that keeps a local product catalogue in sync w
 ## Getting started
 
 ```bash
-git clone https://github.com/EllieK-coder/NexusERP.git
-cd NexusERP
+git clone https://github.com/EllieK-coder/django-inventory-sync.git
+cd django-inventory-sync
 
 python -m venv .venv
 # Windows:      .venv\Scripts\activate
@@ -91,7 +92,7 @@ Example response from `GET /api/products/`:
 ## Project structure
 
 ```
-NexusERP/
+django-inventory-sync/
 ├── DjangoProject6/        # Project settings, root URLs, WSGI/ASGI
 ├── products/              # Main app
 │   ├── models.py          # Product model
