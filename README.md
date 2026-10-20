@@ -132,8 +132,7 @@ django-inventory-sync/
 These are tracked on the roadmap below.
 
 - No authentication: anyone with access to the app can change or delete data.
-- The sync is triggered by a `GET` request, and its results and errors are only logged to the console, not shown to the user.
-- Missing quantities from the external API default to 10.
+- The sync is triggered by a `GET` request instead of a `POST` (planned for Phase 2).- Missing quantities from the external API default to 10.
 - The REST API is read-only.
 
 ## Roadmap
@@ -144,8 +143,8 @@ These are tracked on the roadmap below.
 - [x] Regression test and fix for duplicate product names crashing the sync
 - [x] Move `SECRET_KEY`, `DEBUG` and the sync URL to environment variables (`.env`)
 - [x] GitHub Actions workflow that runs the tests on every push
-- [ ] Show sync results and errors to the user with Django messages ("12 updated, 3 created, 1 skipped")
-- [ ] Rename the `DjangoProject6` settings package to `config`
+- [x] Show sync results and errors to the user with Django messages ("12 updated, 3 created, 1 skipped")
+- - [ ] Rename the `DjangoProject6` settings package to `config`
 - [ ] Screenshots in the README
 
 ### Phase 2 — Security
