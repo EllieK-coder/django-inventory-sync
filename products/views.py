@@ -51,8 +51,8 @@ def product_delete(request, pk):
 
 
 def sync_products(request):
-    url = settings.ERP_API_URL                         # <-- CHANGED: read from .env via settings
-    if not url:                                        # <-- NEW: clear message if it's missing
+    url = settings.ERP_API_URL
+    if not url:
         print("API Sync Failure: ERP_API_URL is not set in .env")
         return redirect('product_list_view')
 
