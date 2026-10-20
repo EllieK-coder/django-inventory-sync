@@ -266,5 +266,16 @@ class SyncProductsTests(TestCase):
         response = self.client.get(reverse("sync_products"))
         self.assertRedirects(response, reverse("product_list_view"))
 
-        response = self.client.get(reverse("sync_products"))
-        self.assertRedirects(response, reverse("product_list_view"))
+    def test_success_message_shows_counts(self, mock_get):
+        mock_get.return_value = fake_response([
+            {"code": "M1", "name": "First", "wholesalePrice": 1, "qty": 1},
+            {"code": "M2", "name": "Second", "wholesalePrice": 1, "qty": 1},
+        ])
+        response = self.client.get(reverse("sync_products"), follow=True)
+        self.assertContains(response, "Sync done: 2 created, 0 updated, 0 skipped")
+
+    def test_error_message_when_api_is_down(self, mock_get):
+        mock_get.side_effect = requests.exceptions.ConnectionError("API is down")
+        response = self.client.get(reverse("sync_products"), follow=True)
+        self.assertContains(response, "Sync failed")
+        self.assertContains(response, "API is down")

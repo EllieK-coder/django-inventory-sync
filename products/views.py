@@ -4,6 +4,7 @@ from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.contrib import messages
 
 from .models import Product
 from .forms import ProductForm
@@ -53,7 +54,7 @@ def product_delete(request, pk):
 def sync_products(request):
     url = settings.ERP_API_URL
     if not url:
-        print("API Sync Failure: ERP_API_URL is not set in .env")
+        messages.error(request, "Sync failed: ERP_API_URL is not set in .env")
         return redirect('product_list_view')
 
     try:
@@ -89,9 +90,10 @@ def sync_products(request):
                 print(f"Skipped item {item.get('code')}: duplicate name")
                 skipped_count += 1
 
-        print(f"Sync done: {created_count} created, {updated_count} updated, {skipped_count} skipped")
+        summary = f"Sync done: {created_count} created, {updated_count} updated, {skipped_count} skipped"
+        messages.success(request, summary)
     except requests.exceptions.RequestException as e:
-        print(f"API Sync Failure: {e}")
+        messages.error(request, f"Sync failed: {e}")
 
     return redirect('product_list_view')
 
