@@ -1,5 +1,5 @@
 import requests
-from django.conf import settings                      # <-- NEW
+from django.conf import settings
 from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.decorators import api_view

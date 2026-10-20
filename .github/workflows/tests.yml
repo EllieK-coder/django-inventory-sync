@@ -9,8 +9,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
-    env:                                                # <-- NEW
-      DJANGO_SECRET_KEY: test-only-not-a-real-secret    # <-- NEW: dummy key just for CI
+    env:
+      DJANGO_SECRET_KEY: test-only-not-a-real-secret
 
     steps:
       - name: Get the code
