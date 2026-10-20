@@ -28,7 +28,7 @@ load_dotenv(BASE_DIR / ".env")             # <-- NEW
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]                     # <-- CHANGED
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"           # <-- CHANGED
+DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")   # <-- CHANGED
 
