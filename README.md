@@ -12,10 +12,10 @@ A Django inventory management app that keeps a local product catalogue in sync w
 ## Features
 
 - **Product management (CRUD):** create, edit and delete products through Django forms with server-side validation (for example, prices can't be negative).
-- **External API sync:** pulls items from a SoftOne/CloudOn ERP endpoint and inserts or updates them locally with `update_or_create`, matched on product code. Running it twice doesn't create duplicates.
+- **External API sync:** pulls items from a SoftOne/CloudOn ERP endpoint and inserts or updates them locally with `update_or_create`, matched on product code. Running it twice doesn't create duplicates. After each sync, a message on the page shows how many products were created, updated and skipped, or why the sync failed.
 - **REST API:** a Django REST Framework endpoint that returns the catalogue as JSON.
 - **Dashboard UI:** dark-themed Bootstrap interface with stock badges (in stock / out of stock). The interface is in Greek.
-- **Automated tests:** 30 tests covering models, form validation, views, the API and the sync (with the external API mocked), run on every push by GitHub Actions.
+- **Automated tests:** 32 tests covering models, form validation, views, the API and the sync (with the external API mocked), run on every push by GitHub Actions.
 
 ## Tech stack
 
@@ -107,6 +107,7 @@ Django creates a separate, temporary test database, so the tests never touch you
    - quantity comes from `qty`.
 4. Network and HTTP errors are caught, so a failed sync doesn't crash the app.
 5. An item that would break a database rule (for example, a duplicate product name) is skipped and logged, and the rest of the sync continues.
+6. A summary such as "Sync done: 12 created, 3 updated, 1 skipped" is shown on the product list using Django messages. Failures appear as a red error message instead.
 
 ## Project structure
 
@@ -132,7 +133,8 @@ django-inventory-sync/
 These are tracked on the roadmap below.
 
 - No authentication: anyone with access to the app can change or delete data.
-- The sync is triggered by a `GET` request instead of a `POST` (planned for Phase 2).- Missing quantities from the external API default to 10.
+- The sync is triggered by a `GET` request instead of a `POST` (planned for Phase 2).
+- Missing quantities from the external API default to 10.
 - The REST API is read-only.
 
 ## Roadmap
@@ -144,7 +146,7 @@ These are tracked on the roadmap below.
 - [x] Move `SECRET_KEY`, `DEBUG` and the sync URL to environment variables (`.env`)
 - [x] GitHub Actions workflow that runs the tests on every push
 - [x] Show sync results and errors to the user with Django messages ("12 updated, 3 created, 1 skipped")
-- - [ ] Rename the `DjangoProject6` settings package to `config`
+- [ ] Rename the `DjangoProject6` settings package to `config`
 - [ ] Screenshots in the README
 
 ### Phase 2 — Security
