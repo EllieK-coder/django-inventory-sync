@@ -15,6 +15,7 @@ A Django inventory management app that keeps a local product catalogue in sync w
 - **External API sync:** pulls items from a SoftOne/CloudOn ERP endpoint and inserts or updates them locally with `update_or_create`, matched on product code. Running it twice doesn't create duplicates.
 - **REST API:** a Django REST Framework endpoint that returns the catalogue as JSON.
 - **Dashboard UI:** dark-themed Bootstrap interface with stock badges (in stock / out of stock). The interface is in Greek.
+- **Automated tests:** 30 tests covering models, form validation, views, the API and the sync (with the external API mocked), run on every push by GitHub Actions.
 
 ## Tech stack
 
@@ -26,6 +27,8 @@ A Django inventory management app that keeps a local product catalogue in sync w
 | HTTP client | requests |
 | Database | SQLite (development) |
 | Front end | Django templates + Bootstrap 5 |
+| Configuration | python-dotenv (`.env` file) |
+| Testing & CI | Django test framework, unittest.mock, GitHub Actions |
 
 ## Getting started
 
@@ -38,9 +41,16 @@ python -m venv .venv
 # macOS/Linux:  source .venv/bin/activate
 
 pip install -r requirements.txt
+
+# Create your local settings file from the template
+# Windows:      copy .env.example .env
+# macOS/Linux:  cp .env.example .env
+
 python manage.py migrate
 python manage.py runserver
 ```
+
+Then open `.env` and set `DJANGO_SECRET_KEY` to a random value. The file explains how to generate one. The app won't start without it.
 
 Open http://127.0.0.1:8000/. The database starts empty; press **Συγχρονισμός Τώρα** (Sync now) to load products from the external API, or add one by hand.
 
@@ -79,6 +89,14 @@ Example response from `GET /api/products/`:
 ]
 ```
 
+## Running the tests
+
+```bash
+python manage.py test
+```
+
+Django creates a separate, temporary test database, so the tests never touch your data. The sync tests replace the external API with a mock, so they run offline and always get the same data.
+
 ## How the sync works
 
 1. `GET` request to the external ERP endpoint (10-second timeout).
@@ -88,19 +106,23 @@ Example response from `GET /api/products/`:
    - price comes from `wholesalePrice`, falling back to `retailPrice`;
    - quantity comes from `qty`.
 4. Network and HTTP errors are caught, so a failed sync doesn't crash the app.
+5. An item that would break a database rule (for example, a duplicate product name) is skipped and logged, and the rest of the sync continues.
 
 ## Project structure
 
 ```
 django-inventory-sync/
+├── .github/workflows/     # CI: runs the tests on every push
 ├── DjangoProject6/        # Project settings, root URLs, WSGI/ASGI
 ├── products/              # Main app
 │   ├── models.py          # Product model
 │   ├── forms.py           # ProductForm with validation
 │   ├── views.py           # CRUD views, sync, API endpoint
 │   ├── serializers.py     # DRF serializer
+│   ├── tests.py           # Test suite
 │   ├── urls.py
 │   └── templates/products/
+├── .env.example           # Template for local settings
 ├── manage.py
 └── requirements.txt
 ```
@@ -110,20 +132,21 @@ django-inventory-sync/
 These are tracked on the roadmap below.
 
 - No authentication: anyone with access to the app can change or delete data.
-- The sync is triggered by a `GET` request, and failures are only logged to the console, not shown to the user.
-- The external API URL and the secret key are hardcoded in the code.
+- The sync is triggered by a `GET` request, and its results and errors are only logged to the console, not shown to the user.
 - Missing quantities from the external API default to 10.
 - The REST API is read-only.
-- No automated tests yet.
 
 ## Roadmap
 
 ### Phase 1 — Quality and reliability
-- [ ] Unit tests for the model, form validation and views
-- [ ] Tests for the sync with the external API mocked
+- [x] Unit tests for the model, form validation and views
+- [x] Tests for the sync with the external API mocked
+- [x] Regression test and fix for duplicate product names crashing the sync
+- [x] Move `SECRET_KEY`, `DEBUG` and the sync URL to environment variables (`.env`)
+- [x] GitHub Actions workflow that runs the tests on every push
+- [ ] Show sync results and errors to the user with Django messages ("12 updated, 3 created, 1 skipped")
 - [ ] Rename the `DjangoProject6` settings package to `config`
-- [ ] Move `SECRET_KEY`, `DEBUG` and the sync URL to environment variables (`.env`)
-- [ ] Show sync results and errors to the user with Django messages ("12 updated, 3 created")
+- [ ] Screenshots in the README
 
 ### Phase 2 — Security
 - [ ] Login and logout with Django's built-in authentication
@@ -136,18 +159,24 @@ These are tracked on the roadmap below.
 - [ ] Filtering, search and pagination
 - [ ] Auto-generated API docs (OpenAPI / Swagger UI with drf-spectacular)
 
-### Phase 4 — Production readiness
+### Phase 4 — Quality engineering
+- [ ] Test coverage report with coverage.py in CI (target: 85%+)
+- [ ] Linting and formatting with ruff, checked in CI
+- [ ] End-to-end browser tests for the create, edit and delete flows with Playwright
+- [ ] Security scan with OWASP ZAP: a baseline scan of the running app in GitHub Actions, findings fixed (for example, missing security headers) and the report kept as a build artifact
+- [ ] Performance tests with Apache JMeter: a load-test plan for `/api/products/` and the product list, run in non-GUI mode, with throughput and 95th-percentile response times recorded in `docs/performance.md`, measured before and after adding pagination
+
+### Phase 5 — Production readiness
 - [ ] `python manage.py sync_products` management command, so the sync can run on a schedule
+- [ ] Move the sync logic from the view into a separate service module
 - [ ] PostgreSQL support
 - [ ] Docker and docker-compose setup
-- [ ] GitHub Actions workflow that runs the tests on every push
-- [ ] Live demo deployment
+- [ ] Live demo deployment with a read-only demo account
 
-### Phase 5 — ERP features
+### Phase 6 — ERP features (stretch goals)
 - [ ] Stock movement history (who changed what, and when)
 - [ ] Low-stock alerts
-- [ ] Product categories and suppliers
-- [ ] Export the catalogue to CSV or Excel
+- [ ] Export the catalogue to CSV
 - [ ] English interface option
 
 ## Author
