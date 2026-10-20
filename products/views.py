@@ -1,5 +1,5 @@
 import requests
-from django.conf import settings                      # <-- NEW
+from django.conf import settings
 from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.decorators import api_view
@@ -51,8 +51,8 @@ def product_delete(request, pk):
 
 
 def sync_products(request):
-    url = settings.ERP_API_URL                         # <-- CHANGED: read from .env via settings
-    if not url:                                        # <-- NEW: clear message if it's missing
+    url = settings.ERP_API_URL
+    if not url:
         print("API Sync Failure: ERP_API_URL is not set in .env")
         return redirect('product_list_view')
 
