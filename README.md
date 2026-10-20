@@ -6,8 +6,8 @@ A Django inventory management app that keeps a local product catalogue in sync w
 
 > **Status:** working MVP, under active development. See the [Roadmap](#roadmap) for what's next.
 
-<!-- Screenshots: add images to docs/screenshots/ and link them here, e.g.
-![Product list](docs/screenshots/product-list.png) -->
+![Product list after a sync](docs/screenshots/product-list.png)
+![Edit product form](docs/screenshots/product-form.png)
 
 ## Features
 
@@ -147,8 +147,7 @@ These are tracked on the roadmap below.
 - [x] GitHub Actions workflow that runs the tests on every push
 - [x] Show sync results and errors to the user with Django messages ("12 updated, 3 created, 1 skipped")
 - [x] Rename the settings package from `DjangoProject6` to `config`
-- [ ] Screenshots in the README
-
+- [x] Screenshots in the README
 ### Phase 2 — Security
 - [ ] Login and logout with Django's built-in authentication
 - [ ] Require login for all create, edit, delete and sync actions
