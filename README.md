@@ -114,7 +114,7 @@ Django creates a separate, temporary test database, so the tests never touch you
 ```
 django-inventory-sync/
 ├── .github/workflows/     # CI: runs the tests on every push
-├── DjangoProject6/        # Project settings, root URLs, WSGI/ASGI
+├── config/        # Project settings, root URLs, WSGI/ASGI
 ├── products/              # Main app
 │   ├── models.py          # Product model
 │   ├── forms.py           # ProductForm with validation
@@ -146,7 +146,7 @@ These are tracked on the roadmap below.
 - [x] Move `SECRET_KEY`, `DEBUG` and the sync URL to environment variables (`.env`)
 - [x] GitHub Actions workflow that runs the tests on every push
 - [x] Show sync results and errors to the user with Django messages ("12 updated, 3 created, 1 skipped")
-- [ ] Rename the `DjangoProject6` settings package to `config`
+- [x] Rename the settings package from `DjangoProject6` to `config`
 - [ ] Screenshots in the README
 
 ### Phase 2 — Security
