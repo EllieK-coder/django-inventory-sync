@@ -63,11 +63,15 @@ def sync_products(request):
 
         items_list = root_json.get('data', [])
 
+        created_count = 0
+        updated_count = 0
+        skipped_count = 0
+
         for item in items_list:
             product_name = item.get('name') or item.get('description') or "Χωρίς Όνομα"
 
             try:
-                Product.objects.update_or_create(
+                product, created = Product.objects.update_or_create(
                     code=item.get('code', 'UNKNOWN'),
                     defaults={
                         'name': product_name,
@@ -77,8 +81,15 @@ def sync_products(request):
                         'description': item.get('description', ''),
                     }
                 )
+                if created:
+                    created_count += 1
+                else:
+                    updated_count += 1
             except IntegrityError:
                 print(f"Skipped item {item.get('code')}: duplicate name")
+                skipped_count += 1
+
+        print(f"Sync done: {created_count} created, {updated_count} updated, {skipped_count} skipped")
     except requests.exceptions.RequestException as e:
         print(f"API Sync Failure: {e}")
 
