@@ -134,4 +134,15 @@ from django.contrib.messages import constants as message_constants
 
 MESSAGE_TAGS = {
     message_constants.ERROR: "danger",
+
+
 }
+
+# Where to send users after logging in and out
+LOGIN_REDIRECT_URL = 'product_list_view'
+LOGOUT_REDIRECT_URL = 'home_view'
+
+# Use a fast password hasher in tests (never in production)
+import sys
+if "test" in sys.argv:
+    PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]

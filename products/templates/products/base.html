@@ -20,6 +20,19 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'product_list_view' %}">Προϊόντα</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'product_add' %}">Προσθήκη</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'api_product_list' %}">API</a></li>
+                                        {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <span class="nav-link text-secondary">{{ user.username }}</span>
+                        </li>
+                        <li class="nav-item">
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-link nav-link">Αποσύνδεση</button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Σύνδεση</a></li>
+                    {% endif %}
                 </ul>
             </div>
         </div>
