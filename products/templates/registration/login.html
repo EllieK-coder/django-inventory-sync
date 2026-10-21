@@ -1,0 +1,33 @@
+{% extends 'products/base.html' %}
+
+{% block title %}Σύνδεση · Nexus ERP{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <h2 class="text-info fw-bold mb-4">Σύνδεση</h2>
+
+        <div class="card shadow border-secondary bg-dark text-white p-4">
+            <form method="post">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                    <div class="alert alert-danger">Λάθος όνομα χρήστη ή κωδικός.</div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label for="id_username" class="form-label fw-bold text-secondary">Όνομα χρήστη</label>
+                    <input type="text" name="username" id="id_username" class="form-control" autofocus required>
+                </div>
+                <div class="mb-3">
+                    <label for="id_password" class="form-label fw-bold text-secondary">Κωδικός</label>
+                    <input type="password" name="password" id="id_password" class="form-control" required>
+                </div>
+
+                <input type="hidden" name="next" value="{{ next }}">
+                <button type="submit" class="btn btn-info fw-bold w-100">Σύνδεση</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

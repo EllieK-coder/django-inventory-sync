@@ -10,13 +10,14 @@ from decimal import Decimal
 from unittest.mock import Mock, patch
 
 import requests
+from django.contrib.auth import logout
 from django.db import IntegrityError
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .forms import ProductForm
 from .models import Product
-
+from django.contrib.auth.models import User
 
 def make_product(**overrides):
     """Create a product with sensible defaults; override any field you need."""
@@ -279,3 +280,45 @@ class SyncProductsTests(TestCase):
         response = self.client.get(reverse("sync_products"), follow=True)
         self.assertContains(response, "Sync failed")
         self.assertContains(response, "API is down")
+
+    def setUp(self):
+        self.user = User.objects.create_user(username="ellie", password="testpass123")
+
+# ---------------------------------------------------------------------------
+# Login and logout
+# ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Login and logout
+# ---------------------------------------------------------------------------
+class AuthTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="ellie", password="testpass123")
+
+    def test_login_page_loads(self):
+        response = self.client.get(reverse("login"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_valid_login_redirects_to_product_list(self):
+        response = self.client.post(reverse("login"), {
+            "username": "ellie",
+            "password": "testpass123",
+        })
+        self.assertRedirects(response, reverse("product_list_view"))
+
+    def test_wrong_password_shows_error(self):
+        response = self.client.post(reverse("login"), {
+            "username": "ellie",
+            "password": "wrong-password",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Λάθος όνομα χρήστη ή κωδικός")
+
+    def test_logout_with_post_logs_user_out(self):
+        self.client.login(username="ellie", password="testpass123")
+        response = self.client.post(reverse("logout"))
+        self.assertRedirects(response, reverse("home_view"))
+
+    def test_logout_with_get_is_not_allowed(self):
+        self.client.login(username="ellie", password="testpass123")
+        response = self.client.get(reverse("logout"))
+        self.assertEqual(response.status_code, 405)

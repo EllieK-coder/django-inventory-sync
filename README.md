@@ -72,6 +72,7 @@ python manage.py createsuperuser
 | `/sync/` | Import products from the external API |
 | `/api/products/` | All products as JSON |
 | `/admin/` | Django admin |
+| `/accounts/login/` | Log in (logout is a button in the navigation bar) |
 
 Example response from `GET /api/products/`:
 
@@ -132,7 +133,7 @@ django-inventory-sync/
 
 These are tracked on the roadmap below.
 
-- No authentication: anyone with access to the app can change or delete data.
+- Logging in is possible, but pages don't require it yet: anyone can still change or delete data (next on the roadmap).
 - The sync is triggered by a `GET` request instead of a `POST` (planned for Phase 2).
 - Missing quantities from the external API default to 10.
 - The REST API is read-only.
@@ -149,7 +150,7 @@ These are tracked on the roadmap below.
 - [x] Rename the settings package from `DjangoProject6` to `config`
 - [x] Screenshots in the README
 ### Phase 2 — Security
-- [ ] Login and logout with Django's built-in authentication
+- [x] Login and logout with Django's built-in authentication-
 - [ ] Require login for all create, edit, delete and sync actions
 - [ ] Make the sync a `POST` action with CSRF protection
 - [ ] Token authentication for the API
