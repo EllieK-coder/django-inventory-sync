@@ -205,7 +205,7 @@ class SyncProductsTests(TestCase):
         mock_get.return_value = fake_response([
             {"code": "S1", "name": "Synced item", "wholesalePrice": 4.5, "qty": 7, "barcode": "999"},
         ])
-        response = self.client.get(reverse("sync_products"))
+        response = self.client.post(reverse("sync_products"))
 
         self.assertRedirects(response, reverse("product_list_view"))
         product = Product.objects.get(code="S1")
@@ -216,7 +216,7 @@ class SyncProductsTests(TestCase):
 
     def test_calls_api_with_a_timeout(self, mock_get):
         mock_get.return_value = fake_response([])
-        self.client.get(reverse("sync_products"))
+        self.client.post(reverse("sync_products"))
         mock_get.assert_called_once()
         self.assertIn("timeout", mock_get.call_args.kwargs)
 
@@ -225,7 +225,7 @@ class SyncProductsTests(TestCase):
         mock_get.return_value = fake_response([
             {"code": "S1", "name": "New name", "wholesalePrice": 2, "qty": 1},
         ])
-        self.client.get(reverse("sync_products"))
+        self.client.post(reverse("sync_products"))
 
         self.assertEqual(Product.objects.count(), 1)
         product = Product.objects.get(code="S1")
@@ -236,22 +236,22 @@ class SyncProductsTests(TestCase):
         mock_get.return_value = fake_response([
             {"code": "S1", "name": "Item", "wholesalePrice": 1, "qty": 1},
         ])
-        self.client.get(reverse("sync_products"))
-        self.client.get(reverse("sync_products"))
+        self.client.post(reverse("sync_products"))
+        self.client.post(reverse("sync_products"))
         self.assertEqual(Product.objects.count(), 1)
 
     def test_falls_back_to_description_and_retail_price(self, mock_get):
         mock_get.return_value = fake_response([
             {"code": "S2", "description": "Only a description", "retailPrice": 9.99, "qty": 1},
         ])
-        self.client.get(reverse("sync_products"))
+        self.client.post(reverse("sync_products"))
         product = Product.objects.get(code="S2")
         self.assertEqual(product.name, "Only a description")
         self.assertEqual(product.price, Decimal("9.99"))
 
     def test_network_error_does_not_crash(self, mock_get):
         mock_get.side_effect = requests.exceptions.ConnectionError("API is down")
-        response = self.client.get(reverse("sync_products"))
+        response = self.client.post(reverse("sync_products"))
         self.assertRedirects(response, reverse("product_list_view"))
         self.assertFalse(Product.objects.exists())
 
@@ -259,12 +259,12 @@ class SyncProductsTests(TestCase):
         bad = Mock()
         bad.raise_for_status.side_effect = requests.exceptions.HTTPError("500 Server Error")
         mock_get.return_value = bad
-        response = self.client.get(reverse("sync_products"))
+        response = self.client.post(reverse("sync_products"))
         self.assertRedirects(response, reverse("product_list_view"))
 
     def test_empty_response_creates_nothing(self, mock_get):
         mock_get.return_value = fake_response([])
-        self.client.get(reverse("sync_products"))
+        self.client.post(reverse("sync_products"))
         self.assertFalse(Product.objects.exists())
 
     def test_duplicate_names_from_api_do_not_crash(self, mock_get):
@@ -272,7 +272,7 @@ class SyncProductsTests(TestCase):
             {"code": "D1", "name": "Same name", "wholesalePrice": 1, "qty": 1},
             {"code": "D2", "name": "Same name", "wholesalePrice": 1, "qty": 1},
         ])
-        response = self.client.get(reverse("sync_products"))
+        response = self.client.post(reverse("sync_products"))
         self.assertRedirects(response, reverse("product_list_view"))
 
     def test_success_message_shows_counts(self, mock_get):
@@ -280,14 +280,19 @@ class SyncProductsTests(TestCase):
             {"code": "M1", "name": "First", "wholesalePrice": 1, "qty": 1},
             {"code": "M2", "name": "Second", "wholesalePrice": 1, "qty": 1},
         ])
-        response = self.client.get(reverse("sync_products"), follow=True)
+        response = self.client.post(reverse("sync_products"), follow=True)
         self.assertContains(response, "Sync done: 2 created, 0 updated, 0 skipped")
 
     def test_error_message_when_api_is_down(self, mock_get):
         mock_get.side_effect = requests.exceptions.ConnectionError("API is down")
-        response = self.client.get(reverse("sync_products"), follow=True)
+        response = self.client.post(reverse("sync_products"), follow=True)
         self.assertContains(response, "Sync failed")
         self.assertContains(response, "API is down")
+
+    def test_sync_with_get_is_not_allowed(self, mock_get):
+        response = self.client.get(reverse("sync_products"))
+        self.assertEqual(response.status_code, 405)
+        mock_get.assert_not_called()
 
 
 # ---------------------------------------------------------------------------
@@ -346,6 +351,7 @@ class LoginRequiredTests(TestCase):
 
     def test_delete_requires_login(self):
         self.assert_redirects_to_login(reverse("product_delete", args=[self.product.pk]))
+
     def test_sync_requires_login(self):
         self.assert_redirects_to_login(reverse("sync_products"))
 
