@@ -150,8 +150,8 @@ These are tracked on the roadmap below.
 - [x] Rename the settings package from `DjangoProject6` to `config`
 - [x] Screenshots in the README
 ### Phase 2 — Security
-- [x] Login and logout with Django's built-in authentication-
-- [ ] Require login for all create, edit, delete and sync actions
+- [x] Login and logout with Django's built-in authentication
+- [x] Require login for all create, edit, delete and sync actions
 - [ ] Make the sync a `POST` action with CSRF protection
 - [ ] Token authentication for the API
 

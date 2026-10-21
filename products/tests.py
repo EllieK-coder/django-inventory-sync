@@ -10,14 +10,14 @@ from decimal import Decimal
 from unittest.mock import Mock, patch
 
 import requests
-from django.contrib.auth import logout
+from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from .forms import ProductForm
 from .models import Product
-from django.contrib.auth.models import User
+
 
 def make_product(**overrides):
     """Create a product with sensible defaults; override any field you need."""
@@ -93,6 +93,10 @@ class ProductFormTests(TestCase):
 # Pages (CRUD views)
 # ---------------------------------------------------------------------------
 class ProductViewTests(TestCase):
+    def setUp(self):
+        user = User.objects.create_user(username="staff", password="testpass123")
+        self.client.force_login(user)
+
     def test_root_redirects_to_home(self):
         response = self.client.get("/")
         self.assertRedirects(response, reverse("home_view"))
@@ -193,6 +197,10 @@ def fake_response(items):
 @override_settings(ERP_API_URL="https://erp.example.test/api")
 @patch("products.views.requests.get")
 class SyncProductsTests(TestCase):
+    def setUp(self):
+        user = User.objects.create_user(username="staff", password="testpass123")
+        self.client.force_login(user)
+
     def test_creates_products_from_api(self, mock_get):
         mock_get.return_value = fake_response([
             {"code": "S1", "name": "Synced item", "wholesalePrice": 4.5, "qty": 7, "barcode": "999"},
@@ -281,12 +289,7 @@ class SyncProductsTests(TestCase):
         self.assertContains(response, "Sync failed")
         self.assertContains(response, "API is down")
 
-    def setUp(self):
-        self.user = User.objects.create_user(username="ellie", password="testpass123")
 
-# ---------------------------------------------------------------------------
-# Login and logout
-# ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
 # Login and logout
 # ---------------------------------------------------------------------------
@@ -322,3 +325,34 @@ class AuthTests(TestCase):
         self.client.login(username="ellie", password="testpass123")
         response = self.client.get(reverse("logout"))
         self.assertEqual(response.status_code, 405)
+
+
+# ---------------------------------------------------------------------------
+# Access control: anonymous visitors must log in first
+# ---------------------------------------------------------------------------
+class LoginRequiredTests(TestCase):
+    def setUp(self):
+        self.product = make_product()
+
+    def assert_redirects_to_login(self, url):
+        response = self.client.get(url)
+        self.assertRedirects(response, f"{reverse('login')}?next={url}")
+
+    def test_add_requires_login(self):
+        self.assert_redirects_to_login(reverse("product_add"))
+
+    def test_edit_requires_login(self):
+        self.assert_redirects_to_login(reverse("product_edit", args=[self.product.pk]))
+
+    def test_delete_requires_login(self):
+        self.assert_redirects_to_login(reverse("product_delete", args=[self.product.pk]))
+    def test_sync_requires_login(self):
+        self.assert_redirects_to_login(reverse("sync_products"))
+
+    def test_anonymous_delete_post_does_not_delete(self):
+        self.client.post(reverse("product_delete", args=[self.product.pk]))
+        self.assertTrue(Product.objects.filter(pk=self.product.pk).exists())
+
+    def test_product_list_is_still_public(self):
+        response = self.client.get(reverse("product_list_view"))
+        self.assertEqual(response.status_code, 200)

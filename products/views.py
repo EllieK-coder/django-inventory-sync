@@ -9,6 +9,7 @@ from django.contrib import messages
 from .models import Product
 from .forms import ProductForm
 from .serializers import ProductSerializer
+from django.contrib.auth.decorators import login_required
 
 
 def home_view(request):
@@ -20,6 +21,7 @@ def product_list_view(request):
     return render(request, 'products/product_list.html', {'products': products})
 
 
+@login_required
 def product_create(request):
     if request.method == "POST":
         form = ProductForm(request.POST)
@@ -31,6 +33,7 @@ def product_create(request):
     return render(request, 'products/product_form.html', {'form': form, 'title': 'Προσθήκη'})
 
 
+@login_required
 def product_edit(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == "POST":
@@ -43,6 +46,7 @@ def product_edit(request, pk):
     return render(request, 'products/product_form.html', {'form': form, 'title': 'Επεξεργασία'})
 
 
+@login_required
 def product_delete(request, pk):
     product = get_object_or_404(Product, pk=pk)
     if request.method == "POST":
@@ -51,6 +55,7 @@ def product_delete(request, pk):
     return render(request, 'products/product_confirm_delete.html', {'product': product})
 
 
+@login_required
 def sync_products(request):
     url = settings.ERP_API_URL
     if not url:
