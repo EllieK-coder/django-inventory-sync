@@ -133,8 +133,7 @@ django-inventory-sync/
 
 These are tracked on the roadmap below.
 
-- Logging in is possible, but pages don't require it yet: anyone can still change or delete data (next on the roadmap).
-- The sync is triggered by a `GET` request instead of a `POST` (planned for Phase 2).
+
 - Missing quantities from the external API default to 10.
 - The REST API is read-only.
 
@@ -152,10 +151,11 @@ These are tracked on the roadmap below.
 ### Phase 2 — Security
 - [x] Login and logout with Django's built-in authentication
 - [x] Require login for all create, edit, delete and sync actions
-- [ ] Make the sync a `POST` action with CSRF protection
+- [x] Make the sync a `POST` action with CSRF protection
 - [ ] Token authentication for the API
 
 ### Phase 3 — A complete REST API
+- [ ] Replace the third-party test endpoint with bundled sample data and a built-in demo ERP endpoint
 - [ ] Full CRUD API with DRF ViewSets and routers
 - [ ] Filtering, search and pagination
 - [ ] Auto-generated API docs (OpenAPI / Swagger UI with drf-spectacular)
