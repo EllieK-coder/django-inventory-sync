@@ -10,6 +10,7 @@ from .models import Product
 from .forms import ProductForm
 from .serializers import ProductSerializer
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 
 def home_view(request):
@@ -56,6 +57,7 @@ def product_delete(request, pk):
 
 
 @login_required
+@require_POST
 def sync_products(request):
     url = settings.ERP_API_URL
     if not url:
