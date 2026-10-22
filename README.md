@@ -30,6 +30,7 @@ pulls items from an ERP REST API (a built-in demo endpoint with 30 sample produc
 | Front end | Django templates + Bootstrap 5 |
 | Configuration | python-dotenv (`.env` file) |
 | Testing & CI | Django test framework, unittest.mock, GitHub Actions |
+| API docs | drf-spectacular (OpenAPI 3, Swagger UI) |
 
 ## Getting started
 
@@ -85,6 +86,8 @@ python manage.py createsuperuser
 | `/api/products/` | API: list products (GET) or create one (POST). Requires a token or login |
 | `/api/products/<id>/` | API: get (GET), update (PUT/PATCH) or delete (DELETE) one product |
 | `/api/token/` | Get an API token (POST `username` and `password`) |
+| `/api/docs/` | Interactive API documentation (Swagger UI), public |
+| `/api/schema/` | OpenAPI 3 schema (YAML) |
 | `/admin/` | Django admin |
 | `/accounts/login/` | Log in (logout is a button in the navigation bar) |
 | `/demo-erp/items/` | Demo ERP endpoint: ... |      ← last row of your table
@@ -190,8 +193,7 @@ These are tracked on the roadmap below.
 - [x] Replace the third-party test endpoint with bundled sample data and a built-in demo ERP endpoint
 - [x] Full CRUD API with DRF ViewSets and routers
 - [x] Filtering, search and pagination
-- [ ] Auto-generated API docs (OpenAPI / Swagger UI with drf-spectacular)
-
+- [x] Auto-generated API docs (OpenAPI / Swagger UI with drf-spectacular)
 ### Phase 4 — Quality engineering
 - [ ] Test coverage report with coverage.py in CI (target: 85%+)
 - [ ] Linting and formatting with ruff, checked in CI

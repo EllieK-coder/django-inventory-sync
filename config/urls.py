@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.shortcuts import redirect
 from rest_framework.authtoken.views import obtain_auth_token
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
 urlpatterns = [
@@ -10,5 +11,7 @@ urlpatterns = [
     path('', include('products.urls')),
     path('', lambda request: redirect('home_view', permanent=False)),
     path('api/token/', obtain_auth_token, name='api_token'),
+    path('api/schema/', SpectacularAPIView.as_view(), name='api_schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='api_schema'), name='api_docs'),
 
 ]
