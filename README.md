@@ -87,22 +87,39 @@ python manage.py createsuperuser
 | `/api/token/` | Get an API token (POST `username` and `password`) |
 | `/admin/` | Django admin |
 | `/accounts/login/` | Log in (logout is a button in the navigation bar) |
-| `/demo-erp/items/` | Demo ERP endpoint: serves the bundled sample products the sync imports by default |
+| `/demo-erp/items/` | Demo ERP endpoint: ... |      ← last row of your table
+
+### Query parameters for `/api/products/`
+
+The API supports search, stock filtering, ordering and pagination (10 results per page).
+
+| Parameter | Example | What it does |
+|---|---|---|
+| `search` | `?search=desk` | Searches code, name, barcode and description |
+| `in_stock` | `?in_stock=true` | `true` = quantity above 0, `false` = quantity is 0 |
+| `ordering` | `?ordering=-price` | Sorts by code, name, price or quantity (`-` = descending) |
+| `page` | `?page=2` | Results come 10 per page |
 
 Example response from `GET /api/products/`:
 
 ```json
-[
-  {
-    "id": 1,
-    "code": "A100",
-    "name": "Office chair",
-    "price": "89.90",
-    "quantity": "12.00",
-    "barcode": "5201234567890",
-    "description": "Ergonomic, adjustable height"
-  }
-]
+{
+  "count": 30,
+  "next": "http://127.0.0.1:8000/api/products/?page=2",
+  "previous": null,
+  "results": [
+    {
+      "id": 1,
+      "code": "A100",
+      "name": "Office chair",
+      "price": "89.90",
+      "quantity": "12.00",
+      "barcode": "5201234567890",
+      "description": "Ergonomic, adjustable height"
+    }
+  ]
+}
+```
 ```
 
 ## Running the tests
@@ -172,7 +189,7 @@ These are tracked on the roadmap below.
 ### Phase 3 — A complete REST API
 - [x] Replace the third-party test endpoint with bundled sample data and a built-in demo ERP endpoint
 - [x] Full CRUD API with DRF ViewSets and routers
-- [ ] Filtering, search and pagination
+- [x] Filtering, search and pagination
 - [ ] Auto-generated API docs (OpenAPI / Swagger UI with drf-spectacular)
 
 ### Phase 4 — Quality engineering
@@ -181,15 +198,22 @@ These are tracked on the roadmap below.
 - [ ] End-to-end browser tests for the create, edit and delete flows with Playwright
 - [ ] Security scan with OWASP ZAP: a baseline scan of the running app in GitHub Actions, findings fixed (for example, missing security headers) and the report kept as a build artifact
 - [ ] Performance tests with Apache JMeter: a load-test plan for `/api/products/` and the product list, run in non-GUI mode, with throughput and 95th-percentile response times recorded in `docs/performance.md`, measured before and after adding pagination
-
-### Phase 5 — Production readiness
+### Phase 5 — Data and SQL
+- [ ] Database-level `CHECK (price >= 0)` constraint (third validation layer after form and serializer)
+- [ ] Product categories and suppliers (foreign keys, many-to-many) with JOIN queries
+- [ ] Stock movement history table (who changed what, and when)
+- [ ] Reports page: total stock value, products per category (GROUP BY / HAVING), top products
+- [ ] Fix N+1 queries with `select_related` / `prefetch_related`, proven with `assertNumQueries`
+- [ ] Indexes on frequently filtered fields, checked with `EXPLAIN`
+- [ ] `docs/sql.md`: the raw SQL behind key ORM queries
+### Phase 6 — Production readiness
 - [ ] `python manage.py sync_products` management command, so the sync can run on a schedule
 - [ ] Move the sync logic from the view into a separate service module
 - [ ] PostgreSQL support
 - [ ] Docker and docker-compose setup
 - [ ] Live demo deployment with a read-only demo account
 
-### Phase 6 — ERP features (stretch goals)
+### Phase 7 — ERP features (stretch goals)
 - [ ] Stock movement history (who changed what, and when)
 - [ ] Low-stock alerts
 - [ ] Export the catalogue to CSV
