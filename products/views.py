@@ -1,4 +1,6 @@
 import requests
+import json
+from pathlib import Path
 from django.conf import settings
 from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
@@ -11,6 +13,7 @@ from .forms import ProductForm
 from .serializers import ProductSerializer
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.http import JsonResponse
 
 
 def home_view(request):
@@ -110,3 +113,12 @@ def api_product_list(request):
     products = Product.objects.all()
     serializer = ProductSerializer(products, many=True)
     return Response(serializer.data)
+
+SAMPLE_DATA_FILE = Path(__file__).resolve().parent / "sample_data" / "erp_items.json"
+
+
+def demo_erp_items(request):
+    """Pretend to be an external ERP API by serving the bundled sample data."""
+    with open(SAMPLE_DATA_FILE, encoding="utf-8") as f:
+        data = json.load(f)
+    return JsonResponse(data)

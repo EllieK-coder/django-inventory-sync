@@ -1,0 +1,274 @@
+{
+  "data": [
+    {
+      "code": "OF-1001",
+      "name": "Ergonomic office chair",
+      "description": "Adjustable height and lumbar support",
+      "barcode": "5201234500017",
+      "retailPrice": 189.0,
+      "wholesalePrice": 139.0,
+      "qty": 24
+    },
+    {
+      "code": "OF-1002",
+      "name": "Standing desk 140x70",
+      "description": "Electric height-adjustable desk",
+      "barcode": "5201234500024",
+      "retailPrice": 449.0,
+      "wholesalePrice": 329.0,
+      "qty": 8
+    },
+    {
+      "code": "OF-1003",
+      "name": "Desk lamp LED",
+      "description": "Dimmable, 3 colour temperatures",
+      "barcode": "5201234500031",
+      "retailPrice": 39.9,
+      "wholesalePrice": 24.5,
+      "qty": 57
+    },
+    {
+      "code": "OF-1004",
+      "name": "Filing cabinet 3 drawers",
+      "description": "Lockable steel cabinet",
+      "barcode": "5201234500048",
+      "retailPrice": 159.0,
+      "wholesalePrice": 112.0,
+      "qty": 12
+    },
+    {
+      "code": "OF-1005",
+      "name": "Whiteboard 120x90",
+      "description": "Magnetic, aluminium frame",
+      "barcode": "5201234500055",
+      "retailPrice": 89.0,
+      "wholesalePrice": 61.0,
+      "qty": 15
+    },
+    {
+      "code": "OF-1006",
+      "name": "Monitor arm dual",
+      "description": "Gas spring, fits 17–32 inch screens",
+      "barcode": "5201234500062",
+      "retailPrice": 119.0,
+      "wholesalePrice": 84.0,
+      "qty": 20
+    },
+    {
+      "code": "OF-1007",
+      "name": "Office chair mat",
+      "description": "Polycarbonate, 120x90 cm",
+      "barcode": "5201234500079",
+      "retailPrice": 54.9,
+      "wholesalePrice": 36.0,
+      "qty": 0
+    },
+    {
+      "code": "OF-1008",
+      "name": "Bookshelf 5 tiers",
+      "description": "Oak finish, 180 cm",
+      "barcode": "5201234500086",
+      "retailPrice": 129.0,
+      "wholesalePrice": 91.0,
+      "qty": 9
+    },
+    {
+      "code": "PC-2001",
+      "name": "Laptop 14 inch i5",
+      "description": "16 GB RAM, 512 GB SSD",
+      "barcode": "5201234500093",
+      "retailPrice": 899.0,
+      "wholesalePrice": 719.0,
+      "qty": 11
+    },
+    {
+      "code": "PC-2002",
+      "name": "Laptop 16 inch i7",
+      "description": "32 GB RAM, 1 TB SSD",
+      "barcode": "5201234500109",
+      "retailPrice": 1499.0,
+      "wholesalePrice": 1199.0,
+      "qty": 4
+    },
+    {
+      "code": "PC-2003",
+      "name": "Mini PC Ryzen 5",
+      "description": "16 GB RAM, 512 GB SSD",
+      "barcode": "5201234500116",
+      "retailPrice": 549.0,
+      "wholesalePrice": 429.0,
+      "qty": 7
+    },
+    {
+      "code": "PC-2004",
+      "name": "Monitor 27 inch QHD",
+      "description": "IPS, 75 Hz, USB-C",
+      "barcode": "5201234500123",
+      "retailPrice": 299.0,
+      "wholesalePrice": 229.0,
+      "qty": 18
+    },
+    {
+      "code": "PC-2005",
+      "name": "Monitor 24 inch FHD",
+      "description": "IPS, HDMI and DisplayPort",
+      "barcode": "5201234500130",
+      "retailPrice": 149.0,
+      "wholesalePrice": 109.0,
+      "qty": 33
+    },
+    {
+      "code": "PC-2006",
+      "name": "Docking station USB-C",
+      "description": "Dual HDMI, Ethernet, 100 W charging",
+      "barcode": "5201234500147",
+      "retailPrice": 179.0,
+      "wholesalePrice": 129.0,
+      "qty": 14
+    },
+    {
+      "code": "PC-2007",
+      "name": "External SSD 1 TB",
+      "description": "USB 3.2, 1050 MB/s",
+      "barcode": "5201234500154",
+      "retailPrice": 119.0,
+      "wholesalePrice": 86.0,
+      "qty": 26
+    },
+    {
+      "code": "PC-2008",
+      "name": "Wi-Fi 6 router",
+      "description": "Dual band, 4 Gigabit ports",
+      "barcode": "5201234500161",
+      "retailPrice": 129.0,
+      "wholesalePrice": 94.0,
+      "qty": 3
+    },
+    {
+      "code": "AC-3001",
+      "name": "Wireless mouse",
+      "description": "Silent clicks, 2.4 GHz receiver",
+      "barcode": "5201234500178",
+      "retailPrice": 24.9,
+      "wholesalePrice": 13.5,
+      "qty": 120
+    },
+    {
+      "code": "AC-3002",
+      "name": "Mechanical keyboard",
+      "description": "Hot-swappable switches, Greek layout",
+      "barcode": "5201234500185",
+      "retailPrice": 109.0,
+      "wholesalePrice": 74.0,
+      "qty": 22
+    },
+    {
+      "code": "AC-3003",
+      "name": "Webcam 1080p",
+      "description": "Built-in microphone, privacy shutter",
+      "barcode": "5201234500192",
+      "retailPrice": 59.0,
+      "wholesalePrice": 38.0,
+      "qty": 41
+    },
+    {
+      "code": "AC-3004",
+      "name": "USB headset",
+      "description": "Noise-cancelling microphone",
+      "barcode": "5201234500208",
+      "retailPrice": 49.0,
+      "wholesalePrice": 31.0,
+      "qty": 37
+    },
+    {
+      "code": "AC-3005",
+      "name": "Laptop backpack 15.6 inch",
+      "description": "Water-resistant",
+      "barcode": "5201234500215",
+      "retailPrice": 45.0,
+      "wholesalePrice": 27.0,
+      "qty": 52
+    },
+    {
+      "code": "AC-3006",
+      "name": "HDMI cable 2 m",
+      "description": "4K, braided",
+      "barcode": "5201234500222",
+      "retailPrice": 12.9,
+      "wholesalePrice": 5.8,
+      "qty": 200
+    },
+    {
+      "code": "AC-3007",
+      "name": "USB-C charger 65 W",
+      "description": "GaN, 2 ports",
+      "barcode": "5201234500239",
+      "retailPrice": 44.9,
+      "wholesalePrice": 28.0,
+      "qty": 0
+    },
+    {
+      "code": "AC-3008",
+      "name": "Wrist rest",
+      "description": "Memory foam",
+      "barcode": "5201234500246",
+      "retailPrice": 19.9,
+      "wholesalePrice": 10.4,
+      "qty": 64
+    },
+    {
+      "code": "PR-4001",
+      "name": "Laser printer mono",
+      "description": "30 ppm, duplex, Wi-Fi",
+      "barcode": "5201234500253",
+      "retailPrice": 199.0,
+      "wholesalePrice": 148.0,
+      "qty": 6
+    },
+    {
+      "code": "PR-4002",
+      "name": "Toner cartridge black",
+      "description": "For PR-4001, ~3000 pages",
+      "barcode": "5201234500260",
+      "retailPrice": 69.0,
+      "wholesalePrice": 44.0,
+      "qty": 48
+    },
+    {
+      "code": "PR-4003",
+      "name": "Copy paper A4 (5 reams)",
+      "description": "80 g/m², 2500 sheets",
+      "barcode": "5201234500277",
+      "retailPrice": 27.5,
+      "wholesalePrice": 19.0,
+      "qty": 140
+    },
+    {
+      "code": "PR-4004",
+      "name": "Label printer",
+      "description": "Thermal, USB and Bluetooth",
+      "barcode": "5201234500284",
+      "retailPrice": 89.0,
+      "wholesalePrice": 63.0,
+      "qty": 10
+    },
+    {
+      "code": "PR-4005",
+      "name": "Shredder cross-cut",
+      "description": "P-4 security, 12 sheets",
+      "barcode": "5201234500291",
+      "retailPrice": 139.0,
+      "wholesalePrice": 97.0,
+      "qty": 5
+    },
+    {
+      "code": "PR-4006",
+      "name": "Document scanner",
+      "description": "Duplex, 30 ppm",
+      "barcode": "5201234500307",
+      "retailPrice": 329.0,
+      "wholesalePrice": 251.0,
+      "qty": 2
+    }
+  ]
+}
