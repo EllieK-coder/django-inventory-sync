@@ -3,6 +3,7 @@
 [![Tests](https://github.com/EllieK-coder/django-inventory-sync/actions/workflows/tests.yml/badge.svg)](https://github.com/EllieK-coder/django-inventory-sync/actions/workflows/tests.yml)
 
 A Django inventory management app that keeps a local product catalogue in sync with an external ERP REST API. It combines a server-rendered dashboard for managing stock by hand with a JSON API for other systems to read from.
+Started as a one-week technical assignment for an ERP software company, then extended into a full project with authentication, tests and CI.
 
 > **Status:** working MVP, under active development. See the [Roadmap](#roadmap) for what's next.
 
@@ -12,7 +13,7 @@ A Django inventory management app that keeps a local product catalogue in sync w
 ## Features
 
 - **Product management (CRUD):** create, edit and delete products through Django forms with server-side validation (for example, prices can't be negative).
-- **External API sync:** pulls items from a SoftOne/CloudOn ERP endpoint and inserts or updates them locally with `update_or_create`, matched on product code. Running it twice doesn't create duplicates. After each sync, a message on the page shows how many products were created, updated and skipped, or why the sync failed.
+pulls items from an ERP REST API (a built-in demo endpoint with 30 sample products is included)
 - **REST API:** a Django REST Framework endpoint that returns the catalogue as JSON.
 - **Dashboard UI:** dark-themed Bootstrap interface with stock badges (in stock / out of stock). The interface is in Greek.
 - **Automated tests:** 32 tests covering models, form validation, views, the API and the sync (with the external API mocked), run on every push by GitHub Actions.
@@ -85,6 +86,7 @@ python manage.py createsuperuser
 | `/api/token/` | Get an API token (POST `username` and `password`) |
 | `/admin/` | Django admin |
 | `/accounts/login/` | Log in (logout is a button in the navigation bar) |
+| `/demo-erp/items/` | Demo ERP endpoint: serves the bundled sample products the sync imports by default |
 
 Example response from `GET /api/products/`:
 
@@ -133,6 +135,7 @@ django-inventory-sync/
 │   ├── forms.py           # ProductForm with validation
 │   ├── views.py           # CRUD views, sync, API endpoint
 │   ├── serializers.py     # DRF serializer
+│   ├── sample_data/       # Sample products served by the demo ERP endpoint    
 │   ├── tests.py           # Test suite
 │   ├── urls.py
 │   └── templates/products/
@@ -166,7 +169,7 @@ These are tracked on the roadmap below.
 - [x] Make the sync a `POST` action with CSRF protection
 - [x] Token authentication for the API
 ### Phase 3 — A complete REST API
-- [ ] Replace the third-party test endpoint with bundled sample data and a built-in demo ERP endpoint
+- [x] Replace the third-party test endpoint with bundled sample data and a built-in demo ERP endpoint
 - [ ] Full CRUD API with DRF ViewSets and routers
 - [ ] Filtering, search and pagination
 - [ ] Auto-generated API docs (OpenAPI / Swagger UI with drf-spectacular)

@@ -404,3 +404,42 @@ class ApiTokenTests(APITestCase):
         self.client.force_login(self.user)
         response = self.client.get(reverse("api_product_list"))
         self.assertEqual(response.status_code, 200)
+
+
+# ---------------------------------------------------------------------------
+# Demo ERP endpoint with bundled sample data
+# ---------------------------------------------------------------------------
+class DemoErpTests(TestCase):
+    def test_demo_endpoint_returns_sample_items(self):
+        response = self.client.get(reverse("demo_erp_items"))
+        self.assertEqual(response.status_code, 200)
+        items = response.json()["data"]
+        self.assertEqual(len(items), 30)
+
+    def test_every_sample_item_has_the_fields_the_sync_needs(self):
+        items = self.client.get(reverse("demo_erp_items")).json()["data"]
+        for item in items:
+            for field in ("code", "name", "wholesalePrice", "qty"):
+                self.assertIn(field, item)
+
+    def test_sample_codes_are_unique(self):
+        items = self.client.get(reverse("demo_erp_items")).json()["data"]
+        item_codes = [item["code"] for item in items]
+        self.assertEqual(len(item_codes), len(set(item_codes),))
+        codes = ["OF-1001", "OF-1002", "OF-1001"]
+          # 2: the duplicate disappears
+
+
+@override_settings(ERP_API_URL="https://erp.example.test/api")
+@patch("products.views.requests.get")
+class SyncWithSampleDataTests(TestCase):
+    def setUp(self):
+        user = User.objects.create_user(username="staff", password="testpass123")
+        self.client.force_login(user)
+
+    def test_sync_imports_all_sample_items(self, mock_get):
+        sample = self.client.get(reverse("demo_erp_items")).json()["data"]
+        mock_get.return_value = fake_response(sample)
+        response = self.client.post(reverse("sync_products"), follow=True)
+        self.assertEqual(Product.objects.count(), 30)
+        self.assertContains(response, "Sync done: 30 created, 0 updated, 0 skipped")
