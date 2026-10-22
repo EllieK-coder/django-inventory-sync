@@ -169,13 +169,13 @@ class ProductApiTests(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
 
     def test_returns_empty_list(self):
-        response = self.client.get(reverse("api_product_list"))
+        response = self.client.get(reverse("api-product-list"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), [])
 
     def test_returns_products_as_json(self):
         make_product(code="A100", name="Office chair", barcode="123")
-        data = self.client.get(reverse("api_product_list")).json()
+        data = self.client.get(reverse("api-product-list")).json()
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]["code"], "A100")
         self.assertEqual(data[0]["name"], "Office chair")
@@ -185,6 +185,52 @@ class ProductApiTests(APITestCase):
             set(data[0]),
             {"id", "code", "name", "price", "quantity", "barcode", "description"},
         )
+
+    def test_create_product(self):
+            response = self.client.post(reverse("api-product-list"), {
+                "code": "API1", "name": "Created via API", "price": "15.00", "quantity": "4",
+            })
+            self.assertEqual(response.status_code, 201)
+            self.assertTrue(Product.objects.filter(code="API1").exists())
+
+    def test_create_with_negative_price_is_rejected(self):
+            response = self.client.post(reverse("api-product-list"), {
+                "code": "API2", "name": "Bad price", "price": "-5", "quantity": "1",
+            })
+            self.assertEqual(response.status_code, 400)
+            self.assertIn("price", response.json())
+            self.assertFalse(Product.objects.filter(code="API2").exists())
+
+    def test_create_with_duplicate_code_is_rejected(self):
+            make_product(code="A100")
+            response = self.client.post(reverse("api-product-list"), {
+                "code": "A100", "name": "Another name", "price": "1.00", "quantity": "1",
+            })
+            self.assertEqual(response.status_code, 400)
+            self.assertIn("code", response.json())
+
+    def test_retrieve_one_product(self):
+            product = make_product(code="A100", name="Office chair")
+            response = self.client.get(reverse("api-product-detail", args=[product.pk]))
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.json()["name"], "Office chair")
+
+    def test_retrieve_missing_product_returns_404(self):
+        response = self.client.get(reverse("api-product-detail", args=[999]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_partial_update_changes_one_field(self):
+            product = make_product(price=Decimal("10.00"))
+            response = self.client.patch(reverse("api-product-detail", args=[product.pk]), {"price": "12.50"})
+            self.assertEqual(response.status_code, 200)
+            product.refresh_from_db()
+            self.assertEqual(product.price, Decimal("12.50"))
+
+    def test_delete_product(self):
+            product = make_product(code="A100", name="Office chair")
+            response = self.client.delete(reverse("api-product-detail", args=[product.pk]))
+            self.assertEqual(response.status_code, 204)
+
 
 # ---------------------------------------------------------------------------
 # Sync with the external API
@@ -392,17 +438,17 @@ class ApiTokenTests(APITestCase):
         self.assertEqual(response.status_code, 400)
 
     def test_api_without_token_is_rejected(self):
-        response = self.client.get(reverse("api_product_list"))
+        response = self.client.get(reverse("api-product-list"))
         self.assertEqual(response.status_code, 401)
 
     def test_api_with_invalid_token_is_rejected(self):
         self.client.credentials(HTTP_AUTHORIZATION="Token 1234")
-        response = self.client.get(reverse("api_product_list"))
+        response = self.client.get(reverse("api-product-list"))
         self.assertEqual(response.status_code, 401)
 
     def test_logged_in_browser_session_can_use_api(self):
         self.client.force_login(self.user)
-        response = self.client.get(reverse("api_product_list"))
+        response = self.client.get(reverse("api-product-list"))
         self.assertEqual(response.status_code, 200)
 
 
@@ -443,3 +489,5 @@ class SyncWithSampleDataTests(TestCase):
         response = self.client.post(reverse("sync_products"), follow=True)
         self.assertEqual(Product.objects.count(), 30)
         self.assertContains(response, "Sync done: 30 created, 0 updated, 0 skipped")
+
+
