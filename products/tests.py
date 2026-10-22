@@ -17,6 +17,8 @@ from django.urls import reverse
 
 from .forms import ProductForm
 from .models import Product
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APITestCase
 
 
 def make_product(**overrides):
@@ -160,7 +162,12 @@ class ProductViewTests(TestCase):
 # ---------------------------------------------------------------------------
 # REST API
 # ---------------------------------------------------------------------------
-class ProductApiTests(TestCase):
+class ProductApiTests(APITestCase):
+    def setUp(self):
+        user = User.objects.create_user(username="api-user", password="testpass123")
+        token = Token.objects.create(user=user)
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+
     def test_returns_empty_list(self):
         response = self.client.get(reverse("api_product_list"))
         self.assertEqual(response.status_code, 200)
@@ -178,7 +185,6 @@ class ProductApiTests(TestCase):
             set(data[0]),
             {"id", "code", "name", "price", "quantity", "barcode", "description"},
         )
-
 
 # ---------------------------------------------------------------------------
 # Sync with the external API
@@ -361,4 +367,40 @@ class LoginRequiredTests(TestCase):
 
     def test_product_list_is_still_public(self):
         response = self.client.get(reverse("product_list_view"))
+        self.assertEqual(response.status_code, 200)
+
+# ---------------------------------------------------------------------------
+# API authentication with tokens
+# ---------------------------------------------------------------------------
+class ApiTokenTests(APITestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="api-user", password="testpass123")
+
+    def test_obtain_token_with_valid_credentials(self):
+        response = self.client.post(reverse("api_token"), {
+            "username": "api-user",
+            "password": "testpass123",
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("token", response.json())
+
+    def test_obtain_token_with_wrong_password_fails(self):
+        response = self.client.post(reverse("api_token"), {
+            "username": "api-user",
+            "password": "wrong",
+        })
+        self.assertEqual(response.status_code, 400)
+
+    def test_api_without_token_is_rejected(self):
+        response = self.client.get(reverse("api_product_list"))
+        self.assertEqual(response.status_code, 401)
+
+    def test_api_with_invalid_token_is_rejected(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token 1234")
+        response = self.client.get(reverse("api_product_list"))
+        self.assertEqual(response.status_code, 401)
+
+    def test_logged_in_browser_session_can_use_api(self):
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("api_product_list"))
         self.assertEqual(response.status_code, 200)
