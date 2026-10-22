@@ -171,11 +171,11 @@ class ProductApiTests(APITestCase):
     def test_returns_empty_list(self):
         response = self.client.get(reverse("api-product-list"))
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json(), [])
+        self.assertEqual(response.json()["results"], [])
 
     def test_returns_products_as_json(self):
         make_product(code="A100", name="Office chair", barcode="123")
-        data = self.client.get(reverse("api-product-list")).json()
+        data = self.client.get(reverse("api-product-list")).json()["results"]
         self.assertEqual(len(data), 1)
         self.assertEqual(data[0]["code"], "A100")
         self.assertEqual(data[0]["name"], "Office chair")
@@ -187,49 +187,88 @@ class ProductApiTests(APITestCase):
         )
 
     def test_create_product(self):
-            response = self.client.post(reverse("api-product-list"), {
-                "code": "API1", "name": "Created via API", "price": "15.00", "quantity": "4",
-            })
-            self.assertEqual(response.status_code, 201)
-            self.assertTrue(Product.objects.filter(code="API1").exists())
+        response = self.client.post(reverse("api-product-list"), {
+            "code": "API1", "name": "Created via API", "price": "15.00", "quantity": "4",
+        })
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(Product.objects.filter(code="API1").exists())
 
     def test_create_with_negative_price_is_rejected(self):
-            response = self.client.post(reverse("api-product-list"), {
-                "code": "API2", "name": "Bad price", "price": "-5", "quantity": "1",
-            })
-            self.assertEqual(response.status_code, 400)
-            self.assertIn("price", response.json())
-            self.assertFalse(Product.objects.filter(code="API2").exists())
+        response = self.client.post(reverse("api-product-list"), {
+            "code": "API2", "name": "Bad price", "price": "-5", "quantity": "1",
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("price", response.json())
+        self.assertFalse(Product.objects.filter(code="API2").exists())
 
     def test_create_with_duplicate_code_is_rejected(self):
-            make_product(code="A100")
-            response = self.client.post(reverse("api-product-list"), {
-                "code": "A100", "name": "Another name", "price": "1.00", "quantity": "1",
-            })
-            self.assertEqual(response.status_code, 400)
-            self.assertIn("code", response.json())
+        make_product(code="A100")
+        response = self.client.post(reverse("api-product-list"), {
+            "code": "A100", "name": "Another name", "price": "1.00", "quantity": "1",
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("code", response.json())
 
     def test_retrieve_one_product(self):
-            product = make_product(code="A100", name="Office chair")
-            response = self.client.get(reverse("api-product-detail", args=[product.pk]))
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json()["name"], "Office chair")
+        product = make_product(code="A100", name="Office chair")
+        response = self.client.get(reverse("api-product-detail", args=[product.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["name"], "Office chair")
 
     def test_retrieve_missing_product_returns_404(self):
         response = self.client.get(reverse("api-product-detail", args=[999]))
         self.assertEqual(response.status_code, 404)
 
     def test_partial_update_changes_one_field(self):
-            product = make_product(price=Decimal("10.00"))
-            response = self.client.patch(reverse("api-product-detail", args=[product.pk]), {"price": "12.50"})
-            self.assertEqual(response.status_code, 200)
-            product.refresh_from_db()
-            self.assertEqual(product.price, Decimal("12.50"))
+        product = make_product(price=Decimal("10.00"))
+        response = self.client.patch(reverse("api-product-detail", args=[product.pk]), {"price": "12.50"})
+        self.assertEqual(response.status_code, 200)
+        product.refresh_from_db()
+        self.assertEqual(product.price, Decimal("12.50"))
 
     def test_delete_product(self):
-            product = make_product(code="A100", name="Office chair")
-            response = self.client.delete(reverse("api-product-detail", args=[product.pk]))
-            self.assertEqual(response.status_code, 204)
+        product = make_product(code="A100", name="Office chair")
+        response = self.client.delete(reverse("api-product-detail", args=[product.pk]))
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(Product.objects.filter(pk=product.pk).exists())
+
+
+# ---------------------------------------------------------------------------
+# API search, filtering, ordering and pagination
+# ---------------------------------------------------------------------------
+class ProductApiQueryTests(APITestCase):
+    def setUp(self):
+        user = User.objects.create_user(username="api-user", password="testpass123")
+        self.client.force_authenticate(user)
+        make_product(code="A1", name="Office chair", price=Decimal("89.90"), quantity=Decimal("5"))
+        make_product(code="A2", name="Desk lamp", price=Decimal("24.50"), quantity=Decimal("0"))
+        make_product(code="A3", name="Standing desk", price=Decimal("449.00"), quantity=Decimal("2"))
+
+    def get_codes(self, params):
+        response = self.client.get(reverse("api-product-list"), params)
+        self.assertEqual(response.status_code, 200)
+        return [item["code"] for item in response.json()["results"]]
+
+    def test_search_by_name(self):
+        self.assertEqual(self.get_codes({"search": "desk"}), ["A2", "A3"])
+
+    def test_filter_in_stock(self):
+        self.assertEqual(self.get_codes({"in_stock": "true"}), ["A1", "A3"])
+
+    def test_filter_out_of_stock(self):
+        self.assertEqual(self.get_codes({"in_stock": "false"}), ["A2"])
+
+    def test_order_by_price_descending(self):
+        self.assertEqual(self.get_codes({"ordering": "-price"}), ["A3", "A1", "A2"])
+
+    def test_results_are_paginated(self):
+        for i in range(12):
+            make_product(code=f"P{i:02}", name=f"Paginated {i}")
+        response = self.client.get(reverse("api-product-list"))
+        data = response.json()
+        self.assertEqual(data["count"], 15)
+        self.assertEqual(len(data["results"]), 10)
+        self.assertIsNotNone(data["next"])
 
 
 # ---------------------------------------------------------------------------
@@ -415,6 +454,7 @@ class LoginRequiredTests(TestCase):
         response = self.client.get(reverse("product_list_view"))
         self.assertEqual(response.status_code, 200)
 
+
 # ---------------------------------------------------------------------------
 # API authentication with tokens
 # ---------------------------------------------------------------------------
@@ -471,9 +511,7 @@ class DemoErpTests(TestCase):
     def test_sample_codes_are_unique(self):
         items = self.client.get(reverse("demo_erp_items")).json()["data"]
         item_codes = [item["code"] for item in items]
-        self.assertEqual(len(item_codes), len(set(item_codes),))
-        codes = ["OF-1001", "OF-1002", "OF-1001"]
-          # 2: the duplicate disappears
+        self.assertEqual(len(item_codes), len(set(item_codes)))
 
 
 @override_settings(ERP_API_URL="https://erp.example.test/api")
@@ -489,5 +527,3 @@ class SyncWithSampleDataTests(TestCase):
         response = self.client.post(reverse("sync_products"), follow=True)
         self.assertEqual(Product.objects.count(), 30)
         self.assertContains(response, "Sync done: 30 created, 0 updated, 0 skipped")
-
-

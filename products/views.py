@@ -4,7 +4,7 @@ from pathlib import Path
 from django.conf import settings
 from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
-from rest_framework import viewsets
+from rest_framework import filters, viewsets
 from django.contrib import messages
 
 from .models import Product
@@ -111,6 +111,18 @@ class ProductViewSet(viewsets.ModelViewSet):
     """Full CRUD API for products: list, create, retrieve, update and delete."""
     queryset = Product.objects.all().order_by("code")
     serializer_class = ProductSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["code", "name", "barcode", "description"]
+    ordering_fields = ["code", "name", "price", "quantity"]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        in_stock = self.request.query_params.get("in_stock")
+        if in_stock == "true":
+            queryset = queryset.filter(quantity__gt=0)
+        elif in_stock == "false":
+            queryset = queryset.filter(quantity=0)
+        return queryset
 
 SAMPLE_DATA_FILE = Path(__file__).resolve().parent / "sample_data" / "erp_items.json"
 
