@@ -45,10 +45,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-
-    'rest_framework',
+     'rest_framework',
     'products',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -146,3 +145,14 @@ LOGOUT_REDIRECT_URL = 'home_view'
 import sys
 if "test" in sys.argv:
     PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
+
+    # Django REST Framework: the API requires a logged-in user or a valid token
+    REST_FRAMEWORK = {
+        "DEFAULT_AUTHENTICATION_CLASSES": [
+            "rest_framework.authentication.TokenAuthentication",
+            "rest_framework.authentication.SessionAuthentication",
+        ],
+        "DEFAULT_PERMISSION_CLASSES": [
+            "rest_framework.permissions.IsAuthenticated",
+        ],
+    }

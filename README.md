@@ -58,6 +58,17 @@ For the admin panel at `/admin/`, create a user first:
 
 ```bash
 python manage.py createsuperuser
+   ### Using the API with a token
+
+```bash
+   # 1. Get a token
+   curl -X POST -d "username=YOUR_USER&password=YOUR_PASSWORD" http://127.0.0.1:8000/api/token/
+
+   # 2. Send it with every request
+   curl -H "Authorization: Token YOUR_TOKEN" http://127.0.0.1:8000/api/products/
+```
+
+   Requests without a valid token get `401 Unauthorized`.
 ```
 
 ## Usage
@@ -69,8 +80,9 @@ python manage.py createsuperuser
 | `/add/` | Add a product |
 | `/edit/<id>/` | Edit a product |
 | `/delete/<id>/` | Delete a product (with confirmation) |
-| `/sync/` | Import products from the external API |
-| `/api/products/` | All products as JSON |
+| `/sync/` | Import products from the external API | 
+| `/api/products/` | All products as JSON (requires a token or a logged-in session) |
+| `/api/token/` | Get an API token (POST `username` and `password`) |
 | `/admin/` | Django admin |
 | `/accounts/login/` | Log in (logout is a button in the navigation bar) |
 
@@ -152,8 +164,7 @@ These are tracked on the roadmap below.
 - [x] Login and logout with Django's built-in authentication
 - [x] Require login for all create, edit, delete and sync actions
 - [x] Make the sync a `POST` action with CSRF protection
-- [ ] Token authentication for the API
-
+- [x] Token authentication for the API
 ### Phase 3 — A complete REST API
 - [ ] Replace the third-party test endpoint with bundled sample data and a built-in demo ERP endpoint
 - [ ] Full CRUD API with DRF ViewSets and routers
