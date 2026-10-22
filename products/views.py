@@ -4,8 +4,7 @@ from pathlib import Path
 from django.conf import settings
 from django.db import IntegrityError
 from django.shortcuts import render, redirect, get_object_or_404
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
+from rest_framework import viewsets
 from django.contrib import messages
 
 from .models import Product
@@ -108,11 +107,10 @@ def sync_products(request):
     return redirect('product_list_view')
 
 
-@api_view(['GET'])
-def api_product_list(request):
-    products = Product.objects.all()
-    serializer = ProductSerializer(products, many=True)
-    return Response(serializer.data)
+class ProductViewSet(viewsets.ModelViewSet):
+    """Full CRUD API for products: list, create, retrieve, update and delete."""
+    queryset = Product.objects.all().order_by("code")
+    serializer_class = ProductSerializer
 
 SAMPLE_DATA_FILE = Path(__file__).resolve().parent / "sample_data" / "erp_items.json"
 

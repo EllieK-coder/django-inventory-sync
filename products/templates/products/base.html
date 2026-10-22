@@ -19,7 +19,7 @@
                     <li class="nav-item"><a class="nav-link" href="{% url 'home_view' %}">Αρχική</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'product_list_view' %}">Προϊόντα</a></li>
                     <li class="nav-item"><a class="nav-link" href="{% url 'product_add' %}">Προσθήκη</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{% url 'api_product_list' %}">API</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'api-product-list' %}">API</a></li>
                     {% if user.is_authenticated %}
                         <li class="nav-item">
                             <span class="nav-link text-secondary">{{ user.username }}</span>

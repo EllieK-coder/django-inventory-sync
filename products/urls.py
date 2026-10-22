@@ -1,5 +1,11 @@
 from django.urls import path
+from rest_framework.routers import SimpleRouter
+
 from . import views
+
+router = SimpleRouter()
+router.register('api/products', views.ProductViewSet, basename='api-product')
+
 urlpatterns = [
     path('home/', views.home_view, name='home_view'),
     path('list/', views.product_list_view, name='product_list_view'),
@@ -8,6 +14,4 @@ urlpatterns = [
     path('edit/<int:pk>/', views.product_edit, name='product_edit'),
     path('delete/<int:pk>/', views.product_delete, name='product_delete'),
     path('demo-erp/items/', views.demo_erp_items, name='demo_erp_items'),
-
-    path('api/products/', views.api_product_list, name='api_product_list'),
-]
+] + router.urls

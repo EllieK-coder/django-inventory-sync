@@ -14,7 +14,7 @@ Started as a one-week technical assignment for an ERP software company, then ext
 
 - **Product management (CRUD):** create, edit and delete products through Django forms with server-side validation (for example, prices can't be negative).
 pulls items from an ERP REST API (a built-in demo endpoint with 30 sample products is included)
-- **REST API:** a Django REST Framework endpoint that returns the catalogue as JSON.
+- **REST API:** full CRUD for products with Django REST Framework (list, create, retrieve, update, delete), protected by token authentication. Prices are validated in the API too, not just in the web form.
 - **Dashboard UI:** dark-themed Bootstrap interface with stock badges (in stock / out of stock). The interface is in Greek.
 - **Automated tests:** 32 tests covering models, form validation, views, the API and the sync (with the external API mocked), run on every push by GitHub Actions.
 
@@ -82,7 +82,8 @@ python manage.py createsuperuser
 | `/edit/<id>/` | Edit a product |
 | `/delete/<id>/` | Delete a product (with confirmation) |
 | `/sync/` | Import products from the external API | 
-| `/api/products/` | All products as JSON (requires a token or a logged-in session) |
+| `/api/products/` | API: list products (GET) or create one (POST). Requires a token or login |
+| `/api/products/<id>/` | API: get (GET), update (PUT/PATCH) or delete (DELETE) one product |
 | `/api/token/` | Get an API token (POST `username` and `password`) |
 | `/admin/` | Django admin |
 | `/accounts/login/` | Log in (logout is a button in the navigation bar) |
@@ -150,7 +151,7 @@ These are tracked on the roadmap below.
 
 
 - Missing quantities from the external API default to 10.
-- The REST API is read-only.
+
 
 ## Roadmap
 
@@ -170,7 +171,7 @@ These are tracked on the roadmap below.
 - [x] Token authentication for the API
 ### Phase 3 — A complete REST API
 - [x] Replace the third-party test endpoint with bundled sample data and a built-in demo ERP endpoint
-- [ ] Full CRUD API with DRF ViewSets and routers
+- [x] Full CRUD API with DRF ViewSets and routers
 - [ ] Filtering, search and pagination
 - [ ] Auto-generated API docs (OpenAPI / Swagger UI with drf-spectacular)
 
