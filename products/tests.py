@@ -7,9 +7,11 @@ Django creates a separate, empty test database for every run,
 so these tests never touch your real db.sqlite3.
 """
 from decimal import Decimal
+from sys import api_version
 from unittest.mock import Mock, patch
 
 import requests
+from charset_normalizer import api
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.test import TestCase, override_settings
@@ -527,3 +529,22 @@ class SyncWithSampleDataTests(TestCase):
         response = self.client.post(reverse("sync_products"), follow=True)
         self.assertEqual(Product.objects.count(), 30)
         self.assertContains(response, "Sync done: 30 created, 0 updated, 0 skipped")
+
+
+
+
+# ---------------------------------------------------------------------------
+# API documentation (OpenAPI schema and Swagger UI)
+# ---------------------------------------------------------------------------
+class ProductApiDocsTests(APITestCase):
+    def test_schema_is_public(self):
+        response = self.client.get(reverse("api_schema"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_swagger_ui_is_public(self):
+        response = self.client.get(reverse("api_docs"))
+        self.assertEqual(response.status_code, 200)
+
+    def test_schema_documents_in_stock_filter(self):
+        response = self.client.get(reverse("api_schema"))
+        self.assertContains(response, "in_stock")

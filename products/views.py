@@ -13,6 +13,7 @@ from .serializers import ProductSerializer
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 
 
 def home_view(request):
@@ -105,6 +106,18 @@ def sync_products(request):
         messages.error(request, f"Sync failed: {e}")
 
     return redirect('product_list_view')
+
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="in_stock",
+                type=bool,
+                description="If true, quantity is above 0, if false quantity is 0",
+            ),
+        ]
+    )
+)
 
 
 class ProductViewSet(viewsets.ModelViewSet):
