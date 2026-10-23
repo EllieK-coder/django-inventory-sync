@@ -195,7 +195,7 @@ These are tracked on the roadmap below.
 - [x] Filtering, search and pagination
 - [x] Auto-generated API docs (OpenAPI / Swagger UI with drf-spectacular)
 ### Phase 4 — Quality engineering
-- [ ] Test coverage report with coverage.py in CI (target: 85%+)
+- [x] Test coverage report with coverage.py in CI (target: 85%+)
 - [ ] Linting and formatting with ruff, checked in CI
 - [ ] End-to-end browser tests for the create, edit and delete flows with Playwright
 - [ ] Security scan with OWASP ZAP: a baseline scan of the running app in GitHub Actions, findings fixed (for example, missing security headers) and the report kept as a build artifact
