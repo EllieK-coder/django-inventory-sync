@@ -34,6 +34,10 @@ pulls items from an ERP REST API (a built-in demo endpoint with 30 sample produc
 
 ## Getting started
 
+
+
+### Run with Docker
+
 ```bash
 git clone https://github.com/EllieK-coder/django-inventory-sync.git
 cd django-inventory-sync
@@ -54,8 +58,8 @@ python manage.py runserver
 
 Then open `.env` and set `DJANGO_SECRET_KEY` to a random value. The file explains how to generate one. The app won't start without it.
 
-Open http://127.0.0.1:8000/. The database starts empty; press **Συγχρονισμός Τώρα** (Sync now) to load products from the external API, or add one by hand.
-
+Open http://127.0.0.1:8000/. The app runs with gunicorn, and static files are served by whitenoise.
+The SQLite database lives inside the container, so it resets when the container is removed.
 For the admin panel at `/admin/`, create a user first:
 
 ```bash
@@ -217,7 +221,7 @@ These are tracked on the roadmap below.
 - [ ] `python manage.py sync_products` management command, so the sync can run on a schedule
 - [ ] Move the sync logic from the view into a separate service module
 - [ ] PostgreSQL support
-- [ ] Docker and docker-compose setup
+- [x] Docker and docker-compose setup
 - [ ] Live demo deployment with a read-only demo account
 
 ### Phase 7 — ERP features (stretch goals)

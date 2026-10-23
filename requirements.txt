@@ -5,3 +5,5 @@
    drf-spectacular==0.30.0
    coverage==7.17.0
    ruff==0.17.2
+   gunicorn == 26.2.0
+   whitenoise == 6.12.0
