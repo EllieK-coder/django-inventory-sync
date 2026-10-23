@@ -17,3 +17,7 @@ ENV/
 
 # Environment configurations containing secure keys
 .env
+
+
+.coverage
+htmlcov/
