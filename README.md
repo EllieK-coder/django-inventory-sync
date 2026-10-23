@@ -126,6 +126,10 @@ Example response from `GET /api/products/`:
 ```
 
 ## Running the tests
+  ruff check .                  # linting
+  ruff format .                 # auto-format the code
+  coverage run manage.py test   # tests with coverage
+  coverage report               # coverage per file
 
 ```bash
 python manage.py test
@@ -197,6 +201,7 @@ These are tracked on the roadmap below.
 ### Phase 4 — Quality engineering
 - [x] Test coverage report with coverage.py in CI (target: 85%+)
 - [x] Linting and formatting with ruff, checked in CI
+- [x] Formatting with ruff format
 - [ ] End-to-end browser tests for the create, edit and delete flows with Playwright
 - [ ] Security scan with OWASP ZAP: a baseline scan of the running app in GitHub Actions, findings fixed (for example, missing security headers) and the report kept as a build artifact
 - [ ] Performance tests with Apache JMeter: a load-test plan for `/api/products/` and the product list, run in non-GUI mode, with throughput and 95th-percentile response times recorded in `docs/performance.md`, measured before and after adding pagination

@@ -6,6 +6,7 @@ Run them with:
 Django creates a separate, empty test database for every run,
 so these tests never touch your real db.sqlite3.
 """
+
 from decimal import Decimal
 from unittest.mock import Mock, patch
 
@@ -119,25 +120,43 @@ class ProductViewTests(TestCase):
         self.assertContains(response, "Η βάση δεδομένων είναι άδεια")
 
     def test_create_product(self):
-        response = self.client.post(reverse("product_add"), {
-            "code": "N1", "name": "New product", "price": "5.50", "quantity": "3",
-        })
+        response = self.client.post(
+            reverse("product_add"),
+            {
+                "code": "N1",
+                "name": "New product",
+                "price": "5.50",
+                "quantity": "3",
+            },
+        )
         self.assertRedirects(response, reverse("product_list_view"))
         product = Product.objects.get(code="N1")
         self.assertEqual(product.price, Decimal("5.50"))
 
     def test_create_with_invalid_data_shows_form_again(self):
-        response = self.client.post(reverse("product_add"), {
-            "code": "N1", "name": "Bad price", "price": "-5", "quantity": "1",
-        })
+        response = self.client.post(
+            reverse("product_add"),
+            {
+                "code": "N1",
+                "name": "Bad price",
+                "price": "-5",
+                "quantity": "1",
+            },
+        )
         self.assertEqual(response.status_code, 200)  # form re-rendered, no redirect
         self.assertFalse(Product.objects.exists())
 
     def test_edit_product(self):
         product = make_product()
-        response = self.client.post(reverse("product_edit", args=[product.pk]), {
-            "code": product.code, "name": "Renamed", "price": "1.00", "quantity": "1",
-        })
+        response = self.client.post(
+            reverse("product_edit", args=[product.pk]),
+            {
+                "code": product.code,
+                "name": "Renamed",
+                "price": "1.00",
+                "quantity": "1",
+            },
+        )
         self.assertRedirects(response, reverse("product_list_view"))
         product.refresh_from_db()
         self.assertEqual(product.name, "Renamed")
@@ -187,25 +206,43 @@ class ProductApiTests(APITestCase):
         )
 
     def test_create_product(self):
-        response = self.client.post(reverse("api-product-list"), {
-            "code": "API1", "name": "Created via API", "price": "15.00", "quantity": "4",
-        })
+        response = self.client.post(
+            reverse("api-product-list"),
+            {
+                "code": "API1",
+                "name": "Created via API",
+                "price": "15.00",
+                "quantity": "4",
+            },
+        )
         self.assertEqual(response.status_code, 201)
         self.assertTrue(Product.objects.filter(code="API1").exists())
 
     def test_create_with_negative_price_is_rejected(self):
-        response = self.client.post(reverse("api-product-list"), {
-            "code": "API2", "name": "Bad price", "price": "-5", "quantity": "1",
-        })
+        response = self.client.post(
+            reverse("api-product-list"),
+            {
+                "code": "API2",
+                "name": "Bad price",
+                "price": "-5",
+                "quantity": "1",
+            },
+        )
         self.assertEqual(response.status_code, 400)
         self.assertIn("price", response.json())
         self.assertFalse(Product.objects.filter(code="API2").exists())
 
     def test_create_with_duplicate_code_is_rejected(self):
         make_product(code="A100")
-        response = self.client.post(reverse("api-product-list"), {
-            "code": "A100", "name": "Another name", "price": "1.00", "quantity": "1",
-        })
+        response = self.client.post(
+            reverse("api-product-list"),
+            {
+                "code": "A100",
+                "name": "Another name",
+                "price": "1.00",
+                "quantity": "1",
+            },
+        )
         self.assertEqual(response.status_code, 400)
         self.assertIn("code", response.json())
 
@@ -293,9 +330,11 @@ class SyncProductsTests(TestCase):
         self.client.force_login(user)
 
     def test_creates_products_from_api(self, mock_get):
-        mock_get.return_value = fake_response([
-            {"code": "S1", "name": "Synced item", "wholesalePrice": 4.5, "qty": 7, "barcode": "999"},
-        ])
+        mock_get.return_value = fake_response(
+            [
+                {"code": "S1", "name": "Synced item", "wholesalePrice": 4.5, "qty": 7, "barcode": "999"},
+            ]
+        )
         response = self.client.post(reverse("sync_products"))
 
         self.assertRedirects(response, reverse("product_list_view"))
@@ -313,9 +352,11 @@ class SyncProductsTests(TestCase):
 
     def test_updates_existing_product_instead_of_duplicating(self, mock_get):
         make_product(code="S1", name="Old name", price=Decimal("1"))
-        mock_get.return_value = fake_response([
-            {"code": "S1", "name": "New name", "wholesalePrice": 2, "qty": 1},
-        ])
+        mock_get.return_value = fake_response(
+            [
+                {"code": "S1", "name": "New name", "wholesalePrice": 2, "qty": 1},
+            ]
+        )
         self.client.post(reverse("sync_products"))
 
         self.assertEqual(Product.objects.count(), 1)
@@ -324,17 +365,21 @@ class SyncProductsTests(TestCase):
         self.assertEqual(product.price, Decimal("2"))
 
     def test_running_sync_twice_does_not_create_duplicates(self, mock_get):
-        mock_get.return_value = fake_response([
-            {"code": "S1", "name": "Item", "wholesalePrice": 1, "qty": 1},
-        ])
+        mock_get.return_value = fake_response(
+            [
+                {"code": "S1", "name": "Item", "wholesalePrice": 1, "qty": 1},
+            ]
+        )
         self.client.post(reverse("sync_products"))
         self.client.post(reverse("sync_products"))
         self.assertEqual(Product.objects.count(), 1)
 
     def test_falls_back_to_description_and_retail_price(self, mock_get):
-        mock_get.return_value = fake_response([
-            {"code": "S2", "description": "Only a description", "retailPrice": 9.99, "qty": 1},
-        ])
+        mock_get.return_value = fake_response(
+            [
+                {"code": "S2", "description": "Only a description", "retailPrice": 9.99, "qty": 1},
+            ]
+        )
         self.client.post(reverse("sync_products"))
         product = Product.objects.get(code="S2")
         self.assertEqual(product.name, "Only a description")
@@ -359,18 +404,22 @@ class SyncProductsTests(TestCase):
         self.assertFalse(Product.objects.exists())
 
     def test_duplicate_names_from_api_do_not_crash(self, mock_get):
-        mock_get.return_value = fake_response([
-            {"code": "D1", "name": "Same name", "wholesalePrice": 1, "qty": 1},
-            {"code": "D2", "name": "Same name", "wholesalePrice": 1, "qty": 1},
-        ])
+        mock_get.return_value = fake_response(
+            [
+                {"code": "D1", "name": "Same name", "wholesalePrice": 1, "qty": 1},
+                {"code": "D2", "name": "Same name", "wholesalePrice": 1, "qty": 1},
+            ]
+        )
         response = self.client.post(reverse("sync_products"))
         self.assertRedirects(response, reverse("product_list_view"))
 
     def test_success_message_shows_counts(self, mock_get):
-        mock_get.return_value = fake_response([
-            {"code": "M1", "name": "First", "wholesalePrice": 1, "qty": 1},
-            {"code": "M2", "name": "Second", "wholesalePrice": 1, "qty": 1},
-        ])
+        mock_get.return_value = fake_response(
+            [
+                {"code": "M1", "name": "First", "wholesalePrice": 1, "qty": 1},
+                {"code": "M2", "name": "Second", "wholesalePrice": 1, "qty": 1},
+            ]
+        )
         response = self.client.post(reverse("sync_products"), follow=True)
         self.assertContains(response, "Sync done: 2 created, 0 updated, 0 skipped")
 
@@ -398,17 +447,23 @@ class AuthTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_valid_login_redirects_to_product_list(self):
-        response = self.client.post(reverse("login"), {
-            "username": "ellie",
-            "password": "testpass123",
-        })
+        response = self.client.post(
+            reverse("login"),
+            {
+                "username": "ellie",
+                "password": "testpass123",
+            },
+        )
         self.assertRedirects(response, reverse("product_list_view"))
 
     def test_wrong_password_shows_error(self):
-        response = self.client.post(reverse("login"), {
-            "username": "ellie",
-            "password": "wrong-password",
-        })
+        response = self.client.post(
+            reverse("login"),
+            {
+                "username": "ellie",
+                "password": "wrong-password",
+            },
+        )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Λάθος όνομα χρήστη ή κωδικός")
 
@@ -463,18 +518,24 @@ class ApiTokenTests(APITestCase):
         self.user = User.objects.create_user(username="api-user", password="testpass123")
 
     def test_obtain_token_with_valid_credentials(self):
-        response = self.client.post(reverse("api_token"), {
-            "username": "api-user",
-            "password": "testpass123",
-        })
+        response = self.client.post(
+            reverse("api_token"),
+            {
+                "username": "api-user",
+                "password": "testpass123",
+            },
+        )
         self.assertEqual(response.status_code, 200)
         self.assertIn("token", response.json())
 
     def test_obtain_token_with_wrong_password_fails(self):
-        response = self.client.post(reverse("api_token"), {
-            "username": "api-user",
-            "password": "wrong",
-        })
+        response = self.client.post(
+            reverse("api_token"),
+            {
+                "username": "api-user",
+                "password": "wrong",
+            },
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_api_without_token_is_rejected(self):
@@ -527,8 +588,6 @@ class SyncWithSampleDataTests(TestCase):
         response = self.client.post(reverse("sync_products"), follow=True)
         self.assertEqual(Product.objects.count(), 30)
         self.assertContains(response, "Sync done: 30 created, 0 updated, 0 skipped")
-
-
 
 
 # ---------------------------------------------------------------------------
