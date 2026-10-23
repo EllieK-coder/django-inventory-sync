@@ -1,6 +1,7 @@
 
 from django.db import models
 
+
 class Product(models.Model):
     code = models.CharField(max_length=10, unique=True, verbose_name="Κωδικός")
     name = models.CharField(max_length=120, unique=True, verbose_name="Περιγραφή")

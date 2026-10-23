@@ -21,11 +21,14 @@ jobs:
         with:
           python-version: "3.13"
           cache: pip
-
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Lint with ruff
+        run: ruff check .
 
       - name: Run tests with coverage
         run: |
           coverage run manage.py test
           coverage report --fail-under=85
+

@@ -11,7 +11,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
+
+from django.contrib.messages import constants as message_constants
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -129,7 +132,6 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 # Show Django "error" messages as Bootstrap's red "danger" alerts
-from django.contrib.messages import constants as message_constants
 
 MESSAGE_TAGS = {
     message_constants.ERROR: "danger",
@@ -142,7 +144,6 @@ LOGIN_REDIRECT_URL = 'product_list_view'
 LOGOUT_REDIRECT_URL = 'home_view'
 
 # Use a fast password hasher in tests (never in production)
-import sys
 if "test" in sys.argv:
     PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 
@@ -162,7 +163,10 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "Django Inventory Sync API",
-    "DESCRIPTION": "REST API for managing the product catalogue: list, search, filter, create, update and delete products. Requires a token or a logged-in session.",
+      "DESCRIPTION": (
+      "REST API for managing the product catalogue: list, search, filter, create, update and delete products. "
+      "Requires a token or a logged-in session."
+  ),
     "VERSION": "1.0.0",
     "SERVE_PERMISSIONS": ["rest_framework.permissions.AllowAny"],
 }
