@@ -7,20 +7,18 @@ Django creates a separate, empty test database for every run,
 so these tests never touch your real db.sqlite3.
 """
 from decimal import Decimal
-from sys import api_version
 from unittest.mock import Mock, patch
 
 import requests
-from charset_normalizer import api
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from rest_framework.authtoken.models import Token
+from rest_framework.test import APITestCase
 
 from .forms import ProductForm
 from .models import Product
-from rest_framework.authtoken.models import Token
-from rest_framework.test import APITestCase
 
 
 def make_product(**overrides):

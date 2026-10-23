@@ -1,19 +1,20 @@
-import requests
 import json
 from pathlib import Path
-from django.conf import settings
-from django.db import IntegrityError
-from django.shortcuts import render, redirect, get_object_or_404
-from rest_framework import filters, viewsets
-from django.contrib import messages
 
-from .models import Product
-from .forms import ProductForm
-from .serializers import ProductSerializer
+import requests
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
+from django.db import IntegrityError
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
+from rest_framework import filters, viewsets
+
+from .forms import ProductForm
+from .models import Product
+from .serializers import ProductSerializer
 
 
 def home_view(request):
