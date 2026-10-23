@@ -221,7 +221,7 @@ These are tracked on the roadmap below.
 - [ ] `python manage.py sync_products` management command, so the sync can run on a schedule
 - [ ] Move the sync logic from the view into a separate service module
 - [ ] PostgreSQL support
-- [ ] Docker and docker-compose setup
+- [x] Docker and docker-compose setup
 - [ ] Live demo deployment with a read-only demo account
 
 ### Phase 7 — ERP features (stretch goals)
