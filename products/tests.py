@@ -12,6 +12,7 @@ from unittest.mock import Mock, patch
 
 import requests
 from django.contrib.auth.models import User
+from django.core.management import call_command
 from django.db import IntegrityError
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -605,3 +606,27 @@ class ProductApiDocsTests(APITestCase):
     def test_schema_documents_in_stock_filter(self):
         response = self.client.get(reverse("api_schema"))
         self.assertContains(response, "in_stock")
+
+
+# ---------------------------------------------------------------------------
+# Demo seed command
+# ---------------------------------------------------------------------------
+
+
+class SeedDemoTests(TestCase):
+    def test_creates_demo_user_and_sample_products(self):
+        call_command("seed_demo")
+        user = User.objects.get(username="demo")
+        self.assertTrue(user.check_password("demo1234"))
+        self.assertEqual(Product.objects.count(), 30)
+
+    def test_demo_user_is_not_a_superuser(self):
+        call_command("seed_demo")
+        user = User.objects.get(username="demo")
+        self.assertFalse(user.is_superuser)
+
+    def test_running_twice_does_not_create_duplicates(self):
+        call_command("seed_demo")
+        call_command("seed_demo")
+        self.assertEqual(User.objects.filter(username="demo").count(), 1)
+        self.assertEqual(Product.objects.count(), 30)

@@ -37,6 +37,8 @@ pulls items from an ERP REST API (a built-in demo endpoint with 30 sample produc
 
 
 ### Run with Docker
+The container creates a demo user on startup: **demo / demo1234** (not an admin).
+For the admin panel, create a superuser: `docker compose exec web python manage.py createsuperuser`
 
 ```bash
 git clone https://github.com/EllieK-coder/django-inventory-sync.git
