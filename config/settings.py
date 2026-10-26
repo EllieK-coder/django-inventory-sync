@@ -35,6 +35,16 @@ DEBUG = os.getenv("DJANGO_DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.getenv("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
+# Full origins (with https://) allowed to submit forms, e.g. https://your-app.onrender.com
+CSRF_TRUSTED_ORIGINS = [origin for origin in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if origin]
+
+# The host handles HTTPS in front of the app and tells Django through this header
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+# In production, only send login and CSRF cookies over HTTPS
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
 # External ERP API used by the product sync
 ERP_API_URL = os.getenv("ERP_API_URL", "")
 
